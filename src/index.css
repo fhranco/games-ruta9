@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #D1232B;
-  --color-secondary: #5D3A2C;
+  --color-r9-red: #C52026; /* Adjusted to match official logo red */
+  --color-r9-gold: #FFB800;
+  --color-r9-dark: #050505;
+  --color-r9-charcoal: #111111;
+  --color-r9-brown: #5D3A2C; /* Mountain color from logo */
+  
   --font-outfit: "Outfit", sans-serif;
   --font-inter: "Inter", sans-serif;
 }
 
 :root {
-  background-color: black;
+  background-color: #050505;
   color-scheme: dark;
 }
 
@@ -18,6 +22,7 @@ body {
   font-family: var(--font-inter);
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
+  background: #050505;
 }
 
 h1, h2, h3, h4 {
@@ -27,15 +32,40 @@ h1, h2, h3, h4 {
 .noise-overlay {
   position: fixed;
   inset: 0;
-  z-index: 100;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  z-index: 1;
+  background-image: url("/pattern.png");
+  background-size: 400px;
   opacity: 0.05;
   pointer-events: none;
+  mix-blend-mode: overlay;
 }
 
 .gradient-mesh {
-  background-color: #000;
+  background-color: #050505;
   background-image: 
-    radial-gradient(at 0% 0%, hsla(357, 71%, 48%, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(18, 36%, 27%, 0.1) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(210, 31, 45, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(255, 184, 0, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(210, 31, 45, 0.1) 0px, transparent 50%);
+}
+
+.card-glass {
+  background: rgba(17, 17, 17, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.text-glow-red {
+  text-shadow: 0 0 20px rgba(210, 31, 45, 0.5);
+}
+
+.text-glow-gold {
+  text-shadow: 0 0 20px rgba(255, 184, 0, 0.5);
+}
+
+.gold-border {
+  border: 1px solid rgba(255, 184, 0, 0.2);
+}
+
+.red-border {
+  border: 1px solid rgba(210, 31, 45, 0.2);
 }
