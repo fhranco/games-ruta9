@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-r9-red: #E31C2D;
+  --color-r9-gold: #FFB800;
+  --color-r9-dark: #0A0A0A;
+  --color-r9-charcoal: #1A1A1A;
+  
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+@layer base {
+  html, body, #root {
+    @apply h-full overflow-hidden bg-r9-dark text-white select-none;
+    font-family: var(--font-body);
+    touch-action: none; /* Bloquea gestos del navegador como pull-to-refresh */
+    -webkit-user-select: none;
+    -webkit-touch-callout: none; /* Bloquea menú contextual en iOS */
+  }
+
+  /* Forzar formato tótem 9:16 en desktop para visualización */
+  @media (min-aspect-ratio: 9/16) {
+    #root {
+      @apply max-w-[450px] mx-auto border-x border-r9-charcoal shadow-2xl;
+    }
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .text-glow-red {
+    text-shadow: 0 0 15px rgba(227, 28, 45, 0.5);
+  }
+  .text-glow-gold {
+    text-shadow: 0 0 15px rgba(255, 184, 0, 0.5);
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

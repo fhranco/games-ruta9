@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --color-r9-dark: #0A0A0A;
+  --color-r9-charcoal: #1A1A1A;
+  --color-r9-red: #D21F2D;
+  --color-r9-gold: #FFB800;
+  
+  --font-body: "Outfit", sans-serif;
+  --font-display: "Inter", sans-serif;
+}
+
+@layer base {
+  html, body, #root {
+    @apply h-full overflow-hidden bg-r9-dark text-white select-none;
+    font-family: var(--font-body);
+    touch-action: none;
+    cursor: none; /* Oculta el puntero en el tótem */
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Kiosk Viewport Full Width */
+  #root {
+    @apply w-full mx-auto relative h-screen overflow-hidden;
+    max-height: 100vh;
+  }
+
+  /* Bloqueo de Orientación Horizontal */
+  @media (orientation: landscape) {
+    body::after {
+      content: "POR FAVOR, USA EL TÓTEM EN POSICIÓN VERTICAL";
+      @apply fixed inset-0 z-[9999] bg-r9-dark flex items-center justify-center text-center font-black p-10 text-r9-gold text-2xl;
+    }
+  }
+}
+
+@layer utilities {
+  .text-glow-red {
+    text-shadow: 0 0 20px rgba(210, 31, 45, 0.5);
+  }
+  
+  .text-glow-gold {
+    text-shadow: 0 0 20px rgba(255, 184, 0, 0.5);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wheel-gradient {
+    background: conic-gradient(
+        from 0deg,
+        #D21F2D 0deg 60deg,
+        #1A1A1A 60deg 120deg,
+        #FFB800 120deg 180deg,
+        #D21F2D 180deg 240deg,
+        #1A1A1A 240deg 300deg,
+        #FFB800 300deg 360deg
+    );
+  }
+}

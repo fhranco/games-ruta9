@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-r9-dark: #050505;
+  --color-r9-charcoal: #111111;
+  --color-r9-red: #D21F2D;
+  --color-r9-gold: #FFB800;
+  
+  --font-body: "Outfit", sans-serif;
+  --font-display: "Inter", sans-serif;
+}
+
+@layer base {
+  html, body, #root {
+    @apply h-screen overflow-hidden bg-r9-dark text-white select-none;
+    font-family: var(--font-body);
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    cursor: none;
+  }
+
+  #root {
+    @apply w-full mx-auto relative h-screen overflow-hidden;
+    max-height: 100vh;
+  }
+
+  @media (orientation: landscape) {
+    body::after {
+      content: "LA RUTA MILLONARIA: USA EL TÓTEM EN VERTICAL";
+      @apply fixed inset-0 z-[9999] bg-r9-dark flex items-center justify-center text-center font-black p-10 text-r9-gold text-2xl;
+    }
+  }
+}
+
+@layer utilities {
+  .quiz-card {
+    @apply bg-r9-charcoal border-2 border-white/5 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.5)];
+  }
+  
+  .option-btn {
+    @apply w-full p-6 rounded-2xl border-2 border-white/5 bg-white/5 text-left transition-all duration-200 active:scale-95 flex items-center gap-4;
+  }
+
+  .option-btn-correct {
+    @apply border-green-500 bg-green-500/20 text-white shadow-[0_0_30px_rgba(34,197,94,0.3)];
+  }
+
+  .option-btn-wrong {
+    @apply border-r9-red bg-r9-red/20 text-white;
+  }
+
+  .gold-glow {
+    box-shadow: 0 0 30px rgba(255, 184, 0, 0.2);
+  }
+}

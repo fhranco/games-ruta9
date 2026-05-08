@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --color-r9-dark: #050505;
+  --color-r9-charcoal: #111111;
+  --color-r9-red: #D21F2D;
+  --color-r9-gold: #FFB800;
+  --color-r9-orange: #FF5C00;
+  
+  --font-body: "Outfit", sans-serif;
+  --font-display: "Inter", sans-serif;
+}
+
+@layer base {
+  html, body, #root {
+    @apply h-screen overflow-hidden bg-r9-dark text-white select-none;
+    font-family: var(--font-body);
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    cursor: none;
+  }
+
+  #root {
+    @apply w-full mx-auto relative h-screen overflow-hidden;
+    max-height: 100vh;
+  }
+
+  @media (orientation: landscape) {
+    body::after {
+      content: "EXPERIENCIA RUTA DEL FUEGO: USA EL TÓTEM EN VERTICAL";
+      @apply fixed inset-0 z-[9999] bg-r9-dark flex items-center justify-center text-center font-black p-10 text-r9-gold text-2xl;
+    }
+  }
+}
+
+@layer utilities {
+  .ember-glow {
+    box-shadow: 0 0 50px rgba(210, 31, 45, 0.4), 0 0 20px rgba(255, 184, 0, 0.2);
+  }
+
+  .text-glow-fire {
+    text-shadow: 0 0 15px rgba(255, 92, 0, 0.6);
+  }
+
+  .smoke-gradient {
+    background: radial-gradient(circle at center, transparent 0%, rgba(5,5,5,0.8) 100%);
+  }
+}
+
+@keyframes drift {
+  from { transform: translateY(0) rotate(0deg); opacity: 0; }
+  20% { opacity: 0.8; }
+  80% { opacity: 0.8; }
+  to { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+}
+
+.particle {
+  @apply absolute rounded-full pointer-events-none;
+  animation: drift linear infinite;
+}

@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --color-r9-dark: #0A0A0A;
+  --color-r9-charcoal: #1A1A1A;
+  --color-r9-red: #D21F2D;
+  --color-r9-gold: #FFB800;
+  --color-r9-orange: #FF5C00;
+  --color-r9-brown: #3D1C02;
+  
+  --font-body: "Outfit", sans-serif;
+  --font-display: "Inter", sans-serif;
+}
+
+@layer base {
+  html, body, #root {
+    @apply h-screen overflow-hidden bg-r9-dark text-white select-none;
+    font-family: var(--font-body);
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    cursor: none;
+  }
+
+  /* Kiosk Viewport Full Width */
+  #root {
+    @apply w-full mx-auto relative h-screen overflow-hidden;
+    max-height: 100vh;
+  }
+
+  /* Bloqueo de Orientación Horizontal */
+  @media (orientation: landscape) {
+    body::after {
+      content: "POR FAVOR, USA EL TÓTEM EN POSICIÓN VERTICAL";
+      @apply fixed inset-0 z-[9999] bg-r9-dark flex items-center justify-center text-center font-black p-10 text-r9-gold text-2xl;
+    }
+  }
+}
+
+@layer utilities {
+  .fire-gradient {
+    background: linear-gradient(90deg, 
+      #8B0000 0%,   /* Cruda */
+      #D21F2D 25%,  /* Casi */
+      #FFB800 50%,  /* PERFECTA */
+      #FF5C00 75%,  /* Pasada */
+      #1A0A00 100%  /* Quemada */
+    );
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 0 20px rgba(255, 184, 0, 0.5);
+  }
+}
