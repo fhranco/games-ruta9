@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/games/calza-burger/(.*)", "destination": "/games/calza-burger/$1" },
+    { "source": "/games/deten-el-9/(.*)", "destination": "/games/deten-el-9/$1" },
+    { "source": "/games/punto-perfecto/(.*)", "destination": "/games/punto-perfecto/$1" },
+    { "source": "/games/ruleta/(.*)", "destination": "/games/ruleta/$1" },
+    { "source": "/games/ruta-del-fuego/(.*)", "destination": "/games/ruta-del-fuego/$1" },
+    { "source": "/games/ruta-millonaria/(.*)", "destination": "/games/ruta-millonaria/$1" },
+    { "source": "/(.*)", "destination": "/$1" }
+  ]
+}

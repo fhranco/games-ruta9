@@ -42,11 +42,16 @@ class SoundEngine {
         this.fireSource = { source, filter, gain };
     }
 
-    updateFireIntensity(intensity) { // 0 to 100
+    updateFireIntensity(intensity, flareActive = false) { // 0 to 100
         if (!this.fireSource) return;
         const now = this.ctx.currentTime;
-        this.fireSource.filter.frequency.setTargetAtTime(100 + (intensity * 10), now, 0.1);
-        this.fireSource.gain.gain.setTargetAtTime(0.01 + (intensity / 500), now, 0.1);
+        const baseFreq = 100 + (intensity * 12);
+        // Al activarse la llamarada, abrimos el filtro para permitir frecuencias agudas de chisporroteo y aumentamos la ganancia.
+        const targetFreq = flareActive ? baseFreq * 2.2 : baseFreq;
+        const targetGain = flareActive ? 0.04 + (intensity / 200) : 0.01 + (intensity / 500);
+
+        this.fireSource.filter.frequency.setTargetAtTime(targetFreq, now, 0.05);
+        this.fireSource.gain.gain.setTargetAtTime(targetGain, now, 0.05);
     }
 
     stopFireRoar() {

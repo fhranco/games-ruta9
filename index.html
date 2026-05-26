@@ -2,11 +2,47 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Inter:wght@400..900&display=swap" rel="stylesheet">
     <title>Arcade Ruta 9 | Games Collection</title>
+    <script>
+      // 1. Deshabilitar Menú Contextual (Clic derecho / Mantener presionado)
+      document.addEventListener('contextmenu', e => e.preventDefault());
+
+      // 2. Bloquear gestos táctiles del sistema (Pinch-to-zoom, gestos multitáctiles)
+      document.addEventListener('touchstart', function (e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      // 3. Bloquear zoom de doble toque
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function (e) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          e.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, { passive: false });
+
+      // 4. Bloquear atajos de teclado críticos en caso de tener teclado físico conectado
+      document.addEventListener('keydown', function (e) {
+        if (['F5', 'F11', 'F12'].includes(e.key)) {
+          e.preventDefault();
+        }
+        if (
+          (e.ctrlKey && e.key === 'r') ||
+          (e.metaKey && e.key === 'r') ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+          (e.metaKey && e.altKey && e.key.toUpperCase() === 'I')
+        ) {
+          e.preventDefault();
+        }
+      });
+    </script>
   </head>
   <body class="bg-black text-white selection:bg-primary selection:text-white overflow-hidden">
     <div id="root"></div>

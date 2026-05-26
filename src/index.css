@@ -16,12 +16,34 @@
   color-scheme: dark;
 }
 
-body {
+/* Bloqueos y optimizaciones para Kiosco / Totem */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+  position: fixed;
+  touch-action: none; /* Deshabilita gestos nativos de zoom y scroll del navegador */
+}
+
+body {
   font-family: var(--font-inter);
   -webkit-font-smoothing: antialiased;
-  overflow: hidden;
   background: #050505;
 }
 

@@ -12,7 +12,7 @@ export default function WelcomeScreen({ onPlay, onRules }) {
 
     if (requestMethod) {
       requestMethod.call(elem).catch(err => {
-        alert("Para pantalla completa, asegúrate de haber interactuado con la página primero.");
+        console.warn("Pantalla completa no disponible o bloqueada:", err);
       });
     }
   };

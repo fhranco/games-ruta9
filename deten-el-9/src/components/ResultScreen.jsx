@@ -8,7 +8,25 @@ import { sounds } from '../utils/sounds';
 
 export default function ResultScreen({ result, playerData, onReset }) {
   const [outcome, setOutcome] = useState(null);
+  const [canInteract, setCanInteract] = useState(false);
   const hasSaved = React.useRef(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setCanInteract(true), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleResetPress = (e) => {
+    e.preventDefault();
+    if (!canInteract) return;
+    onReset();
+  };
+
+  const handleExitPress = (e) => {
+    e.preventDefault();
+    if (!canInteract) return;
+    window.parent.postMessage({ type: 'EXIT_GAME' }, '*');
+  };
 
   useEffect(() => {
     if (hasSaved.current) return;
@@ -17,7 +35,7 @@ export default function ResultScreen({ result, playerData, onReset }) {
     setOutcome(res);
     
     // Play win sound
-    sounds.playWin(res.score === 100);
+    sounds.playGameResult(res.level);
 
     // Persistir jugada (Solo una vez)
     storage.savePlay({
@@ -64,11 +82,20 @@ export default function ResultScreen({ result, playerData, onReset }) {
       </div>
 
       <div className="space-y-4">
-        <PrimaryButton variant="gold" onClick={onReset} className="flex items-center justify-center gap-3">
-           REINICIAR JUEGO
-        </PrimaryButton>
-        <p className="text-[10px] text-center text-white/20 uppercase tracking-widest">
-           Uso exclusivo del personal de Ruta9
+        <button 
+          onPointerDown={handleResetPress}
+          className={`w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest transition-all active:scale-95 bg-white/5 border-2 border-white/10 text-white cursor-pointer select-none touch-none ${!canInteract ? 'opacity-50' : 'hover:bg-white/10'}`}
+        >
+          NUEVO JUEGO
+        </button>
+        <button 
+          onPointerDown={handleExitPress}
+          className={`w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest transition-all active:scale-95 bg-r9-gold text-r9-dark cursor-pointer select-none touch-none shadow-[0_8px_0_0_#C48D00] ${!canInteract ? 'opacity-50' : 'hover:bg-[#FFC833]'}`}
+        >
+          VOLVER A JUEGOS
+        </button>
+        <p className="text-[10px] text-center text-white/20 uppercase tracking-widest pt-2">
+           Tótem Digital Ruta 9
         </p>
       </div>
     </motion.div>

@@ -6,11 +6,12 @@ import { sounds } from '../utils/sounds';
 export default function StopwatchGame({ onFinished }) {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
+  const isRunningRef = useRef(true);
   const startTimeRef = useRef(performance.now());
   const requestRef = useRef();
 
   const animate = (now) => {
-    if (isRunning) {
+    if (isRunningRef.current) {
       const elapsed = (now - startTimeRef.current) / 1000;
       setTime(elapsed);
       sounds.updateMotorPitch(elapsed);
@@ -27,6 +28,8 @@ export default function StopwatchGame({ onFinished }) {
 
   useEffect(() => {
     startTimeRef.current = performance.now();
+    isRunningRef.current = true;
+    setIsRunning(true);
     sounds.startMotor();
     requestRef.current = requestAnimationFrame(animate);
     return () => {
@@ -36,15 +39,18 @@ export default function StopwatchGame({ onFinished }) {
   }, []);
 
   const handleStop = (e) => {
-    if (e) {
+    if (e && typeof e.preventDefault === 'function') {
       e.preventDefault();
+    }
+    if (e && typeof e.stopPropagation === 'function') {
       e.stopPropagation();
     }
-    if (!isRunning) return;
+    if (!isRunningRef.current) return;
     
+    isRunningRef.current = false;
+    setIsRunning(false);
     sounds.stopMotor();
     sounds.playStop();
-    setIsRunning(false);
     cancelAnimationFrame(requestRef.current);
     const stoppedAt = time;
     
@@ -54,9 +60,37 @@ export default function StopwatchGame({ onFinished }) {
   };
 
   const getTimeColor = () => {
-    if (time >= 8.9 && time <= 9.1) return 'text-r9-red text-glow-red animate-pulse';
+    if (time >= 8.9 && time <= 9.1) return 'text-r9-red text-glow-red';
     if (time >= 8.0) return 'text-r9-gold text-glow-gold';
     return 'text-white/80';
+  };
+
+  // Función matemática de distorsión extrema e interactiva para añadir dificultad progresiva
+  const getDistortionStyle = () => {
+    if (!isRunning) return {};
+
+    // La distorsión comienza gradualmente a los 4 segundos y llega a su máxima intensidad a los 8 segundos
+    if (time < 4.0) return {};
+
+    const intensity = Math.min((time - 4.0) / 4.0, 1.0); // De 0.0 a 1.0 en el rango de [4s, 8s]
+
+    // 1. Oscilación de desenfoque de alta frecuencia (entre 0px y 7.5px de blur)
+    const blurFreq = time * 18;
+    const blur = Math.abs(Math.sin(blurFreq)) * 7.5 * intensity;
+
+    // 2. Deformación angular (skew) aleatoria
+    const skewX = Math.sin(time * 16) * 12 * intensity; // Inclinación en X (hasta +/- 12 grados)
+    const skewY = Math.cos(time * 24) * 6 * intensity;  // Inclinación en Y (hasta +/- 6 grados)
+
+    // 3. Vibración / Temblor (glitch translation displacement)
+    const translateX = Math.sin(time * 48) * 4 * intensity;
+    const translateY = Math.cos(time * 42) * 4 * intensity;
+
+    return {
+      filter: `blur(${blur.toFixed(2)}px)`,
+      transform: `skew(${skewX.toFixed(1)}deg, ${skewY.toFixed(1)}deg) translate(${translateX.toFixed(1)}px, ${translateY.toFixed(1)}px)`,
+      transition: 'filter 0.03s linear, transform 0.03s linear'
+    };
   };
 
   return (
@@ -64,11 +98,23 @@ export default function StopwatchGame({ onFinished }) {
       <div className="text-center space-y-4">
         <h2 className="text-xl font-black uppercase tracking-[0.3em] text-white/40">Detén el tiempo en</h2>
         <h3 className="text-6xl font-black text-r9-gold text-glow-gold">9.000s</h3>
+        
+        {isRunning && time >= 4.0 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-xs font-black text-r9-red drop-shadow-[0_0_8px_rgba(197,32,38,0.6)] tracking-[0.25em] uppercase"
+            style={{ animation: 'pulse 1.2s infinite ease-in-out' }}
+          >
+            ⚠️ ¡DISTORSIÓN DE TIEMPO ACTIVA! ⚠️
+          </motion.div>
+        )}
       </div>
 
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center overflow-visible">
         <motion.div 
           className={`text-9xl font-black tabular-nums tracking-tighter transition-colors duration-100 ${getTimeColor()}`}
+          style={getDistortionStyle()}
         >
           {time.toFixed(3)}
         </motion.div>
@@ -77,9 +123,8 @@ export default function StopwatchGame({ onFinished }) {
       <div className="w-full">
         {isRunning ? (
           <button 
-            onMouseDown={handleStop}
-            onTouchStart={handleStop}
-            className="w-full h-40 bg-r9-red text-white text-4xl font-black rounded-3xl shadow-[0_12px_0_0_#9B141E] active:translate-y-2 active:shadow-none transition-all uppercase tracking-widest"
+            onPointerDown={handleStop}
+            className="w-full h-40 bg-r9-red text-white text-4xl font-black rounded-3xl shadow-[0_12px_0_0_#9B141E] active:translate-y-2 active:shadow-none transition-all uppercase tracking-widest cursor-pointer select-none touch-none"
           >
             ¡DETENER!
           </button>

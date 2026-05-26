@@ -38,9 +38,20 @@ function App() {
     }
   };
 
-  const handleStart = () => {
+  const [canInteract, setCanInteract] = useState(false);
+
+  useEffect(() => {
+    setCanInteract(false);
+    const timer = setTimeout(() => setCanInteract(true), 800);
+    return () => clearTimeout(timer);
+  }, [gameState]);
+
+  const handleStart = (e) => {
+    if (e) e.preventDefault();
+    if (!canInteract) return;
     sounds.startFireAmbience();
-    setGameState('form');
+    setPlayerData({ name: 'Cliente', receipt: '12345' });
+    setGameState('playing');
   };
 
   const handleStop = (position) => {
@@ -54,9 +65,18 @@ function App() {
     }, 1000);
   };
 
-  const resetGame = () => {
+  const resetGame = (e) => {
+    if (e) e.preventDefault();
+    if (!canInteract) return;
     setPlayerData({ name: '', receipt: '' });
     setGameState('welcome');
+  };
+
+  const exitGame = (e) => {
+    if (e) e.preventDefault();
+    if (!canInteract) return;
+    sounds.stopFire();
+    window.parent.postMessage({ type: 'EXIT_GAME' }, '*');
   };
 
   return (
@@ -100,44 +120,7 @@ function App() {
             </motion.div>
           )}
 
-          {gameState === 'form' && (
-            <motion.div 
-              key="form"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-8"
-            >
-              <h3 className="text-4xl font-black uppercase italic text-glow-gold">Registro</h3>
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase text-white/30 tracking-[0.2em]">Tu Nombre</label>
-                  <input 
-                    type="text" 
-                    placeholder="Ej. Juan Pérez"
-                    className="w-full bg-r9-charcoal border-2 border-white/5 rounded-2xl p-6 text-xl outline-none focus:border-r9-red transition-all"
-                    onChange={(e) => setPlayerData({...playerData, name: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase text-white/30 tracking-[0.2em]">N° Boleta</label>
-                  <input 
-                    type="text" 
-                    placeholder="Ej. 12345"
-                    className="w-full bg-r9-charcoal border-2 border-white/5 rounded-2xl p-6 text-xl outline-none focus:border-r9-red transition-all"
-                    onChange={(e) => setPlayerData({...playerData, receipt: e.target.value})}
-                  />
-                </div>
-                <button 
-                  onClick={() => setGameState('playing')}
-                  disabled={!playerData.name || !playerData.receipt}
-                  className="w-full py-8 bg-white text-r9-dark rounded-3xl font-black text-2xl uppercase disabled:opacity-50"
-                >
-                  CONTINUAR
-                </button>
-              </div>
-            </motion.div>
-          )}
+
 
           {gameState === 'playing' && (
             <motion.div 

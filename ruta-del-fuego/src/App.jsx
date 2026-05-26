@@ -6,9 +6,10 @@ import { Maximize, Minimize, RotateCcw, Flame } from 'lucide-react';
 
 function App() {
   const [gameState, setGameState] = useState('intro'); // intro, form, experience, result
-  const [playerData, setPlayerData] = useState({ name: '', receipt: '' });
+  const [playerData, setPlayerData] = useState({ name: 'Invitado', receipt: '0000' });
   const [result, setResult] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [canInteract, setCanInteract] = useState(false);
 
   useEffect(() => {
     const handleContextMenu = (e) => e.preventDefault();
@@ -24,12 +25,25 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    setCanInteract(false);
+    const timer = setTimeout(() => setCanInteract(true), 800);
+    return () => clearTimeout(timer);
+  }, [gameState]);
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen();
     }
+  };
+
+  const handleStart = (e) => {
+    if (e) e.preventDefault();
+    if (!canInteract) return;
+    setPlayerData({ name: 'Invitado', receipt: '0000' });
+    setGameState('experience');
   };
 
   const handleFinish = (level) => {
@@ -42,9 +56,17 @@ function App() {
     }, 1000);
   };
 
-  const resetGame = () => {
-    setPlayerData({ name: '', receipt: '' });
+  const resetGame = (e) => {
+    if (e) e.preventDefault();
+    if (!canInteract) return;
+    setPlayerData({ name: 'Invitado', receipt: '0000' });
     setGameState('intro');
+  };
+
+  const exitGame = (e) => {
+    if (e) e.preventDefault();
+    if (!canInteract) return;
+    window.parent.postMessage({ type: 'EXIT_GAME' }, '*');
   };
 
   return (
@@ -79,42 +101,11 @@ function App() {
             </div>
 
             <button 
-                onClick={() => setGameState('form')}
-                className="w-full max-w-xs py-8 bg-r9-red rounded-[40px] font-black text-xl shadow-[0_12px_0_0_#9B141E] active:translate-y-2 active:shadow-none transition-all uppercase tracking-widest"
+                onPointerDown={handleStart}
+                className={`w-full max-w-xs py-8 bg-r9-red rounded-[40px] font-black text-xl shadow-[0_12px_0_0_#9B141E] active:translate-y-2 active:shadow-none transition-all uppercase tracking-widest select-none touch-none ${!canInteract ? 'opacity-50' : ''}`}
             >
                 INICIAR EXPERIENCIA
             </button>
-          </motion.div>
-        )}
-
-        {gameState === 'form' && (
-          <motion.div 
-            key="form"
-            initial={{ opacity: 0, x: 100 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -100 }}
-            className="flex-1 flex flex-col items-center justify-center p-8 space-y-8"
-          >
-            <h3 className="text-4xl font-black uppercase italic text-glow-fire">Registro Premium</h3>
-            <div className="w-full max-w-xs space-y-6">
-                <input 
-                  type="text" 
-                  placeholder="Tu Nombre"
-                  className="w-full bg-r9-charcoal border-2 border-white/5 rounded-3xl p-6 text-xl outline-none focus:border-r9-red transition-all"
-                  onChange={(e) => setPlayerData({...playerData, name: e.target.value})}
-                />
-                <input 
-                  type="text" 
-                  placeholder="N° de Boleta"
-                  className="w-full bg-r9-charcoal border-2 border-white/5 rounded-3xl p-6 text-xl outline-none focus:border-r9-red transition-all"
-                  onChange={(e) => setPlayerData({...playerData, receipt: e.target.value})}
-                />
-                <button 
-                  onClick={() => setGameState('experience')}
-                  disabled={!playerData.name || !playerData.receipt}
-                  className="w-full py-8 bg-white text-r9-dark rounded-[40px] font-black text-2xl uppercase disabled:opacity-50 tracking-tighter"
-                >
-                  PREPARAR BRASA
-                </button>
-            </div>
           </motion.div>
         )}
 
@@ -147,12 +138,20 @@ function App() {
                 </div>
               </div>
 
-              <button 
-                onClick={resetGame}
-                className="w-full max-w-xs py-6 bg-white/5 border-2 border-white/10 rounded-3xl font-black flex items-center justify-center gap-4 hover:bg-white/10 transition-all uppercase text-lg"
-              >
-                <RotateCcw size={20} /> NUEVA RUTA
-              </button>
+              <div className="w-full max-w-xs space-y-4">
+                <button 
+                  onPointerDown={resetGame}
+                  className={`w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest transition-all active:scale-95 bg-white/5 border-2 border-white/10 text-white cursor-pointer select-none touch-none ${!canInteract ? 'opacity-50' : 'hover:bg-white/10'}`}
+                >
+                  NUEVO JUEGO
+                </button>
+                <button 
+                  onPointerDown={exitGame}
+                  className={`w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest transition-all active:scale-95 bg-r9-gold text-r9-dark cursor-pointer select-none touch-none shadow-[0_8px_0_0_#C48D00] ${!canInteract ? 'opacity-50' : 'hover:bg-[#FFC833]'}`}
+                >
+                  VOLVER A JUEGOS
+                </button>
+              </div>
             </motion.div>
         )}
       </AnimatePresence>

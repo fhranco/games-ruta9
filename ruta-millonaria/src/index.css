@@ -3,8 +3,9 @@
 @theme {
   --color-r9-dark: #050505;
   --color-r9-charcoal: #111111;
-  --color-r9-red: #D21F2D;
+  --color-r9-red: #C52026;
   --color-r9-gold: #FFB800;
+  --color-r9-brown: #5D3A2C;
   
   --font-body: "Outfit", sans-serif;
   --font-display: "Inter", sans-serif;
@@ -13,11 +14,10 @@
 @layer base {
   html, body, #root {
     @apply h-screen overflow-hidden bg-r9-dark text-white select-none;
-    font-family: var(--font-body);
+    font-family: var(--font-display);
     touch-action: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
-    cursor: none;
   }
 
   #root {
@@ -34,23 +34,103 @@
 }
 
 @layer utilities {
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background-image: url("/pattern.png");
+    background-size: 300px;
+    opacity: 0.04;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  .gradient-mesh {
+    background-color: #050505;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(197, 32, 38, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(255, 184, 0, 0.1) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(197, 32, 38, 0.1) 0px, transparent 50%);
+  }
+
+  .glass-card {
+    background: rgba(17, 17, 17, 0.65);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  }
+
+  .glass-card-gold {
+    background: rgba(17, 17, 17, 0.7);
+    backdrop-filter: blur(25px);
+    border: 2px solid rgba(255, 184, 0, 0.25);
+    box-shadow: 0 0 50px rgba(255, 184, 0, 0.15), 0 30px 60px rgba(0, 0, 0, 0.7);
+  }
+
+  .glass-card-red {
+    background: rgba(17, 17, 17, 0.7);
+    backdrop-filter: blur(25px);
+    border: 2px solid rgba(197, 32, 38, 0.25);
+    box-shadow: 0 0 50px rgba(197, 32, 38, 0.15), 0 30px 60px rgba(0, 0, 0, 0.7);
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 0 15px rgba(255, 184, 0, 0.6);
+  }
+
+  .text-glow-red {
+    text-shadow: 0 0 15px rgba(197, 32, 38, 0.6);
+  }
+
+  .text-glow-white {
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+  }
+
   .quiz-card {
-    @apply bg-r9-charcoal border-2 border-white/5 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.5)];
+    background: rgba(17, 17, 17, 0.65);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    @apply rounded-[3.5rem] p-10 shadow-[0_30px_60px_rgba(0,0,0,0.6)] relative overflow-hidden;
   }
   
   .option-btn {
-    @apply w-full p-6 rounded-2xl border-2 border-white/5 bg-white/5 text-left transition-all duration-200 active:scale-95 flex items-center gap-4;
+    @apply w-full p-6 rounded-[2rem] border border-white/5 bg-white/5 text-left transition-all duration-300 active:scale-98 flex items-center gap-5 hover:border-r9-gold/30 hover:bg-white/10 cursor-pointer;
   }
 
   .option-btn-correct {
-    @apply border-green-500 bg-green-500/20 text-white shadow-[0_0_30px_rgba(34,197,94,0.3)];
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-color: rgba(16, 185, 129, 0.5) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.25) !important;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
   }
 
   .option-btn-wrong {
-    @apply border-r9-red bg-r9-red/20 text-white;
+    background: rgba(197, 32, 38, 0.15) !important;
+    border-color: rgba(197, 32, 38, 0.5) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 30px rgba(197, 32, 38, 0.25) !important;
+    text-shadow: 0 0 10px rgba(197, 32, 38, 0.4);
   }
 
-  .gold-glow {
-    box-shadow: 0 0 30px rgba(255, 184, 0, 0.2);
+  /* Efecto de ticket troquelado */
+  .ticket-cutout {
+    position: relative;
+    background: radial-gradient(circle at 0% 50%, transparent 12px, rgba(17, 17, 17, 0.7) 13px) 0% 0% / 100% 100% no-repeat,
+                radial-gradient(circle at 100% 50%, transparent 12px, rgba(17, 17, 17, 0.7) 13px) 0% 0% / 100% 100% no-repeat;
+  }
+
+  /* Custom scrollbar for options list if needed */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 99px;
   }
 }

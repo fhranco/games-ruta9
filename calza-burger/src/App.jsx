@@ -7,7 +7,7 @@ import { Maximize, Minimize, RotateCcw, Box } from 'lucide-react';
 
 function App() {
   const [gameState, setGameState] = useState('welcome'); // welcome, form, playing, result
-  const [playerData, setPlayerData] = useState({ name: '', receipt: '' });
+  const [playerData, setPlayerData] = useState({ name: 'Invitado', receipt: '0000' });
   const [result, setResult] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [attempts, setAttempts] = useState(0);
@@ -27,6 +27,13 @@ function App() {
     };
   }, []);
 
+  // Efecto para disparar la fanfarria de resultados y la voz del locutor sintético en español
+  useEffect(() => {
+    if (gameState === 'result' && result) {
+      sounds.playGameResult(result.level);
+    }
+  }, [gameState, result]);
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
@@ -38,7 +45,7 @@ function App() {
   const handleStart = () => {
     setAttempts(0);
     setBestResult(null);
-    setGameState('form');
+    setGameState('playing');
   };
 
   const handleStop = (position) => {
@@ -66,7 +73,7 @@ function App() {
   };
 
   const resetGame = () => {
-    setPlayerData({ name: '', receipt: '' });
+    setPlayerData({ name: 'Invitado', receipt: '0000' });
     setAttempts(0);
     setBestResult(null);
     setGameState('welcome');
@@ -115,39 +122,6 @@ function App() {
             </motion.div>
           )}
 
-          {gameState === 'form' && (
-            <motion.div 
-              key="form"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-8"
-            >
-              <h3 className="text-4xl font-black uppercase italic">Identifícate</h3>
-              <div className="space-y-6">
-                <input 
-                  type="text" 
-                  placeholder="Tu Nombre"
-                  className="w-full bg-r9-charcoal border-2 border-white/5 rounded-2xl p-6 text-xl outline-none focus:border-r9-red"
-                  onChange={(e) => setPlayerData({...playerData, name: e.target.value})}
-                />
-                <input 
-                  type="text" 
-                  placeholder="N° de Boleta"
-                  className="w-full bg-r9-charcoal border-2 border-white/5 rounded-2xl p-6 text-xl outline-none focus:border-r9-red"
-                  onChange={(e) => setPlayerData({...playerData, receipt: e.target.value})}
-                />
-                <button 
-                  onClick={() => setGameState('playing')}
-                  disabled={!playerData.name || !playerData.receipt}
-                  className="w-full py-8 bg-white text-r9-dark rounded-3xl font-black text-2xl uppercase disabled:opacity-50"
-                >
-                  ¡EMPEZAR!
-                </button>
-              </div>
-            </motion.div>
-          )}
-
           {gameState === 'playing' && (
             <motion.div key="playing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">
               <div className="flex justify-center gap-2 mb-8">
@@ -183,12 +157,18 @@ function App() {
                 <p className="text-white/40 text-xs italic">{result.condition}</p>
               </div>
 
-              <div className="pt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-8">
                 <button 
                   onClick={resetGame}
-                  className="w-full py-6 bg-white/5 border-2 border-white/10 rounded-3xl font-black flex items-center justify-center gap-4 uppercase text-xl"
+                  className="w-full py-6 bg-white/5 border-2 border-white/10 rounded-3xl font-black flex items-center justify-center gap-4 uppercase text-xl hover:bg-white/10 active:scale-95 transition-all select-none"
                 >
                   <RotateCcw size={24} /> NUEVO JUEGO
+                </button>
+                <button 
+                  onClick={() => window.parent.postMessage({ type: 'EXIT_GAME' }, '*')}
+                  className="w-full py-6 bg-r9-red border-2 border-r9-red rounded-3xl font-black flex items-center justify-center gap-4 uppercase text-xl shadow-[0_6px_0_0_#9B141E] hover:bg-r9-red/90 active:translate-y-1 active:shadow-none active:scale-95 transition-all select-none"
+                >
+                  VOLVER A MENÚ
                 </button>
               </div>
             </motion.div>

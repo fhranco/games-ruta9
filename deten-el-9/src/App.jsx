@@ -55,17 +55,11 @@ function App() {
       <div className="flex-1 w-full max-w-lg mx-auto px-6 pb-12 overflow-y-auto no-scrollbar">
         {gameState === 'welcome' && (
           <WelcomeScreen 
-            onPlay={() => setGameState('form')} 
-            onRules={() => setGameState('rules')} 
-          />
-        )}
-        
-        {gameState === 'form' && (
-          <PlayerForm 
-            onSubmit={(data) => {
-              setPlayerData(data)
-              setGameState('countdown')
+            onPlay={() => {
+              setPlayerData({ name: 'Cliente', receipt: '12345' });
+              setGameState('countdown');
             }} 
+            onRules={() => setGameState('rules')} 
           />
         )}
 

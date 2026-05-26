@@ -7,11 +7,24 @@ export default function CookMeter({ onStop }) {
   const [isMoving, setIsMoving] = useState(true);
   const requestRef = useRef();
   const directionRef = useRef(1); // 1 = right, -1 = left
-  const speed = 2.8;
+  const lastTimeRef = useRef(0);
+  const speed = 3.2; // Aumentada ligeramente para más dinamismo a 60 FPS
 
-  const animate = (time) => {
+  const animate = (now) => {
+    if (!lastTimeRef.current) {
+      lastTimeRef.current = now;
+      requestRef.current = requestAnimationFrame(animate);
+      return;
+    }
+
+    const deltaMs = now - lastTimeRef.current;
+    lastTimeRef.current = now;
+
+    // Normalizar a 60 FPS
+    const delta = Math.min(3.0, deltaMs / 16.666);
+
     setPosition((prev) => {
-      let next = prev + directionRef.current * speed;
+      let next = prev + directionRef.current * speed * delta;
       
       if (next >= 100) {
         directionRef.current = -1;
@@ -27,11 +40,15 @@ export default function CookMeter({ onStop }) {
   };
 
   useEffect(() => {
+    lastTimeRef.current = performance.now();
     requestRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(requestRef.current);
   }, []);
 
-  const handleStop = () => {
+  const handleStop = (e) => {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
     if (!isMoving) return;
     setIsMoving(false);
     cancelAnimationFrame(requestRef.current);
@@ -81,9 +98,9 @@ export default function CookMeter({ onStop }) {
       </div>
 
       <button
-        onClick={handleStop}
+        onPointerDown={handleStop}
         disabled={!isMoving}
-        className={`w-full py-8 rounded-3xl font-black text-4xl uppercase tracking-[0.4em] transition-all
+        className={`w-full py-8 rounded-3xl font-black text-4xl uppercase tracking-[0.4em] transition-all cursor-pointer select-none touch-none
           ${!isMoving ? 'opacity-50 scale-95 bg-r9-charcoal' : 'bg-r9-red text-white shadow-[0_12px_0_0_#9B141E] active:translate-y-2 active:shadow-none'}
         `}
       >
