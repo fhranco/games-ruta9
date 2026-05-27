@@ -3,7 +3,7 @@ export function calculateBurgerMatchResult(completedCount) {
     return {
       score: 100,
       message: "¡Maestro de la Ruleta!",
-      prize: "3 cupones de sorteo por promo burger por 2",
+      prize: "Participas por Promo Burger + Bebida para 2 personas",
       condition: "Sujeto a sorteo semanal",
       level: "perfect",
       couponPrefix: "R9-PERF"
@@ -14,7 +14,7 @@ export function calculateBurgerMatchResult(completedCount) {
     return {
       score: 80,
       message: "¡Excelente Cocinero!",
-      prize: "Papas gratis",
+      prize: "2 Cupones para sorteo",
       condition: "Solo en caja",
       level: "excellent",
       couponPrefix: "R9-PAP"
@@ -25,7 +25,7 @@ export function calculateBurgerMatchResult(completedCount) {
     return {
       score: 50,
       message: "¡Buen Intento!",
-      prize: "Salsa gratis",
+      prize: "1 Cupón para sorteo",
       condition: "Comprando burger",
       level: "good",
       couponPrefix: "R9-SALS"
@@ -35,7 +35,7 @@ export function calculateBurgerMatchResult(completedCount) {
   return {
     score: 0,
     message: "¡La plancha se quemó!",
-    prize: "Sigue participando",
+    prize: "Vuelve mañana por otro intento",
     condition: "¡Sigue intentando!",
     level: "try-again",
     couponPrefix: "NONE"

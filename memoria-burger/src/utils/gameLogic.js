@@ -3,7 +3,7 @@ export function calculateMemoryMatchResult(matchedPairsCount) {
     return {
       score: 100,
       message: "¡Victoria Perfecta!",
-      prize: "Hamburguesa Promo R9 Gratis",
+      prize: "Participas por Promo Burger + Bebida para 2 personas",
       condition: "Válido hoy en caja con este código",
       level: "perfect",
       couponPrefix: "R9-PERF"
@@ -14,7 +14,7 @@ export function calculateMemoryMatchResult(matchedPairsCount) {
     return {
       score: 80,
       message: "¡Gran Memoria!",
-      prize: "Papas Fritas Gratis",
+      prize: "2 Cupones para sorteo",
       condition: "Solo en caja con tu compra",
       level: "excellent",
       couponPrefix: "R9-PAP"
@@ -25,7 +25,7 @@ export function calculateMemoryMatchResult(matchedPairsCount) {
     return {
       score: 50,
       message: "¡Buen Intento!",
-      prize: "Salsa Premium Gratis",
+      prize: "1 Cupón para sorteo",
       condition: "Acompañando tu menú",
       level: "good",
       couponPrefix: "R9-SALS"
@@ -35,7 +35,7 @@ export function calculateMemoryMatchResult(matchedPairsCount) {
   return {
     score: 0,
     message: "¡Se te acabó el tiempo!",
-    prize: "Sigue participando",
+    prize: "Vuelve mañana por otro intento",
     condition: "¡Prueba de nuevo y sé más veloz!",
     level: "try-again",
     couponPrefix: "NONE"

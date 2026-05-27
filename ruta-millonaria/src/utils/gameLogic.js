@@ -29,7 +29,7 @@ export function calculateTriviaResult(correctAnswers) {
       score: 100,
       levelName: "Maestro de la Carta",
       message: "Dominaste la carta Ruta9",
-      prize: "3 cupones de sorteo por promo burger por 2",
+      prize: "Participas por Promo Burger + Bebida para 2 personas",
       condition: "Canjeable en caja",
       level: "master",
       couponPrefix: "R9-TRIVIA"
@@ -41,7 +41,7 @@ export function calculateTriviaResult(correctAnswers) {
       score: 90,
       levelName: "Experto Ruta9",
       message: "Conoces muy bien la carta",
-      prize: "Papas gratis",
+      prize: "2 Cupones para sorteo",
       condition: "Solo en caja",
       level: "expert",
       couponPrefix: "R9-TRIVIA"
@@ -53,7 +53,7 @@ export function calculateTriviaResult(correctAnswers) {
       score: 75,
       levelName: "Fan Ruta9",
       message: "Buen conocimiento de la carta",
-      prize: "Salsa gratis",
+      prize: "1 Cupón para sorteo",
       condition: "Comprando burger",
       level: "fan",
       couponPrefix: "R9-TRIVIA"
@@ -64,7 +64,7 @@ export function calculateTriviaResult(correctAnswers) {
     score: 10,
     levelName: "Visitante Ruta9",
     message: "¡Sigue participando!",
-    prize: "Sigue participando",
+    prize: "Vuelve mañana por otro intento",
     condition: "Sigue jugando para ganar",
     level: "visitor",
     couponPrefix: "R9-TRIVIA"

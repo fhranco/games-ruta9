@@ -131,28 +131,28 @@ export default function App() {
       finalPrize = {
         level: 'perfect',
         message: "¡Héroe de Ruta 9!",
-        prize: "3 cupones de sorteo por promo burger por 2",
+        prize: "Participas por Promo Burger + Bebida para 2 personas",
         condition: "Muestra este código en caja"
       };
     } else if (score >= 10) {
       finalPrize = {
         level: 'excellent',
         message: "¡Súper Reflejos!",
-        prize: "Papas gratis",
+        prize: "2 Cupones para sorteo",
         condition: "Solo en caja con tu consumo"
       };
     } else if (score >= 5) {
       finalPrize = {
         level: 'good',
         message: "¡Buen Intento!",
-        prize: "Salsa gratis",
+        prize: "1 Cupón para sorteo",
         condition: "Comprando tu burger"
       };
     } else {
       finalPrize = {
         level: 'try-again',
         message: "¡BOOM! Explotaste",
-        prize: "Sigue participando",
+        prize: "Vuelve mañana por otro intento",
         condition: "¡La cocina se llenó de salsa!"
       };
     }
