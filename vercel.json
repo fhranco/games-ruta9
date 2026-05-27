@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "cleanUrls": true,
   "rewrites": [
     { "source": "/games/calza-burger/assets/(.*)", "destination": "/games/calza-burger/assets/$1" },
     { "source": "/games/deten-el-9/assets/(.*)", "destination": "/games/deten-el-9/assets/$1" },
@@ -15,7 +14,6 @@
     { "source": "/games/ruleta/(.*)", "destination": "/games/ruleta/$1" },
     { "source": "/games/ruta-del-fuego/(.*)", "destination": "/games/ruta-del-fuego/$1" },
     { "source": "/games/ruta-millonaria/(.*)", "destination": "/games/ruta-millonaria/$1" },
-    { "source": "/games/memoria-burger/(.*)", "destination": "/games/memoria-burger/$1" },
-    { "source": "/(.*)", "destination": "/$1" }
+    { "source": "/games/memoria-burger/(.*)", "destination": "/games/memoria-burger/$1" }
   ]
 }
