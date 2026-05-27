@@ -764,8 +764,8 @@ export default function App() {
              <p className="text-xs font-black uppercase tracking-[0.6em] text-white/30 italic">
                RUTA 9 <span className="text-r9-red">EXCLUSIVE</span> EXPERIENCE
              </p>
-             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/10">
-               Design by Patagonia Coach • Digital Totem Solutions
+             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">
+               Creado por Agencia PatagoniaCoach • v1.1.0 (Build: 2026-05-27)
              </p>
           </div>
         </div>
