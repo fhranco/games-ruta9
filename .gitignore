@@ -24,5 +24,4 @@ dist-ssr
 *.sw?
 
 # Built Games (These are generated during build)
-public/games/*
 !public/games/.gitkeep
