@@ -444,7 +444,7 @@ export default function App() {
             </div>
 
             <iframe
-              src={`games/${activeGame}/index.html`}
+              src={`/games/${activeGame}/index.html`}
               className="w-full h-full border-none shadow-2xl bg-r9-dark"
               title="Game Content"
               allow="autoplay; speech-synthesis; fullscreen"
