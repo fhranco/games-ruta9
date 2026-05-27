@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Array of games
-GAMES=("calza-burger" "deten-el-9" "punto-perfecto" "ruleta" "ruta-del-fuego" "ruta-millonaria")
+GAMES=("calza-burger" "deten-el-9" "punto-perfecto" "ruleta" "ruta-del-fuego" "ruta-millonaria" "memoria-burger")
 
 # Create public/games directory if it doesn't exist
 mkdir -p public/games

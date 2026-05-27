@@ -6,7 +6,7 @@ export function calculateFireRouteResult(releasedFireLevel) {
     return {
       score: 100,
       message: "Punto Ruta9 alcanzado",
-      prize: "Participas por experiencia Ruta9 para dos",
+      prize: "3 cupones de sorteo por promo burger por 2",
       condition: "Sujeto a sorteo semanal",
       level: "perfect",
       couponPrefix: "R9-FUEGO"
@@ -17,8 +17,8 @@ export function calculateFireRouteResult(releasedFireLevel) {
     return {
       score: 90,
       message: "Fuego perfecto",
-      prize: "Upgrade de papas comprando combo",
-      condition: "Solo comprando combo",
+      prize: "Papas gratis",
+      condition: "Solo en caja",
       level: "excellent",
       couponPrefix: "R9-FUEGO"
     };
@@ -28,41 +28,19 @@ export function calculateFireRouteResult(releasedFireLevel) {
     return {
       score: 75,
       message: "Buen punto de brasa",
-      prize: "Salsa premium gratis",
+      prize: "Salsa gratis",
       condition: "Comprando burger",
       level: "good",
       couponPrefix: "R9-FUEGO"
     };
   }
 
-  if (diff <= 18) {
-    return {
-      score: 50,
-      message: "Casi llegas al punto",
-      prize: "10% para próxima compra",
-      condition: "Válido en próxima visita",
-      level: "regular",
-      couponPrefix: "R9-FUEGO"
-    };
-  }
-
-  if (releasedFireLevel < targetFireLevel) {
-    return {
-      score: 10,
-      message: "Se apagó la brasa",
-      prize: "Gracias por participar",
-      condition: "Sin beneficio directo",
-      level: "low-fire",
-      couponPrefix: "R9-FUEGO"
-    };
-  }
-
   return {
     score: 10,
-    message: "Se pasó el fuego",
-    prize: "Gracias por participar",
-    condition: "Sin beneficio directo",
-    level: "over-fire",
+    message: "¡Sigue participando!",
+    prize: "Sigue participando",
+    condition: "¡Sigue intentando!",
+    level: "try-again",
     couponPrefix: "R9-FUEGO"
   };
 }

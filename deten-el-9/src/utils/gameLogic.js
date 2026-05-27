@@ -9,7 +9,7 @@ export function calculateResult(stoppedTime) {
     return {
       score: 100,
       message: "Punto perfecto Ruta9",
-      prize: "3 Cupones para sorteo semanal",
+      prize: "3 cupones de sorteo por promo burger por 2",
       level: "perfect"
     };
   }
@@ -18,7 +18,7 @@ export function calculateResult(stoppedTime) {
     return {
       score: 98,
       message: "Brutal, casi perfecto",
-      prize: "2 Cupones para sorteo semanal",
+      prize: "Papas gratis",
       level: "excellent"
     };
   }
@@ -27,15 +27,15 @@ export function calculateResult(stoppedTime) {
     return {
       score: 90,
       message: "Muy cerca",
-      prize: "1 Cupón para sorteo semanal",
+      prize: "Salsa gratis",
       level: "great"
     };
   }
 
   return {
     score: 10,
-    message: "Te faltó precisión magallánica",
-    prize: "Vuelve mañana por otro intento",
+    message: "¡Sigue participando!",
+    prize: "Sigue participando",
     level: "try-again"
   };
 }

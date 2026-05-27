@@ -6,7 +6,7 @@ export function calculatePerfectPointResult(stoppedPosition) {
     return {
       score: 100,
       message: "Punto perfecto Ruta9",
-      prize: "Participas por combo para dos semanal",
+      prize: "3 cupones de sorteo por promo burger por 2",
       condition: "Sujeto a sorteo semanal",
       level: "perfect",
       couponPrefix: "R9-PERF"
@@ -17,8 +17,8 @@ export function calculatePerfectPointResult(stoppedPosition) {
     return {
       score: 90,
       message: "Tremendo punto",
-      prize: "Upgrade de papas comprando combo",
-      condition: "Solo comprando combo",
+      prize: "Papas gratis",
+      condition: "Solo en caja",
       level: "excellent",
       couponPrefix: "R9-UPG"
     };
@@ -28,29 +28,18 @@ export function calculatePerfectPointResult(stoppedPosition) {
     return {
       score: 75,
       message: "Muy buen punto",
-      prize: "Salsa premium gratis",
+      prize: "Salsa gratis",
       condition: "Comprando burger",
       level: "good",
       couponPrefix: "R9-SALS"
     };
   }
 
-  if (diff <= 15) {
-    return {
-      score: 50,
-      message: "Casi perfecto",
-      prize: "10% para próxima compra",
-      condition: "Válido en próxima visita",
-      level: "regular",
-      couponPrefix: "R9-NEXT"
-    };
-  }
-
   return {
     score: 10,
     message: "Se pasó el fuego",
-    prize: "Gracias por jugar",
-    condition: "Sin beneficio directo",
+    prize: "Sigue participando",
+    condition: "¡Sigue intentando!",
     level: "try-again",
     couponPrefix: "R9-R9"
   };

@@ -71,3 +71,29 @@
   animation: slideUpElastic 0.38s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
+/* Card Flip 3D Utilities */
+.perspective-800 {
+  perspective: 800px;
+}
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden; /* Muy importante para Safari en macOS/Tótems */
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotateY(180deg) translateX(0); }
+  25% { transform: rotateY(180deg) translateX(-6px); }
+  75% { transform: rotateY(180deg) translateX(6px); }
+}
+
+.animate-shake {
+  animation: shake 0.2s ease-in-out 3;
+}
+
+

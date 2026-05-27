@@ -1,32 +1,32 @@
-export function calculateBurgerMatchResult(completedCount) {
-  if (completedCount >= 3) {
+export function calculateMemoryMatchResult(matchedPairsCount) {
+  if (matchedPairsCount >= 8) {
     return {
       score: 100,
-      message: "¡Maestro de la Ruleta!",
-      prize: "3 cupones de sorteo por promo burger por 2",
-      condition: "Sujeto a sorteo semanal",
+      message: "¡Victoria Perfecta!",
+      prize: "Hamburguesa Promo R9 Gratis",
+      condition: "Válido hoy en caja con este código",
       level: "perfect",
       couponPrefix: "R9-PERF"
     };
   }
 
-  if (completedCount === 2) {
+  if (matchedPairsCount >= 6) {
     return {
       score: 80,
-      message: "¡Excelente Cocinero!",
-      prize: "Papas gratis",
-      condition: "Solo en caja",
+      message: "¡Gran Memoria!",
+      prize: "Papas Fritas Gratis",
+      condition: "Solo en caja con tu compra",
       level: "excellent",
       couponPrefix: "R9-PAP"
     };
   }
 
-  if (completedCount === 1) {
+  if (matchedPairsCount >= 4) {
     return {
       score: 50,
       message: "¡Buen Intento!",
-      prize: "Salsa gratis",
-      condition: "Comprando burger",
+      prize: "Salsa Premium Gratis",
+      condition: "Acompañando tu menú",
       level: "good",
       couponPrefix: "R9-SALS"
     };
@@ -34,9 +34,9 @@ export function calculateBurgerMatchResult(completedCount) {
 
   return {
     score: 0,
-    message: "¡La plancha se quemó!",
+    message: "¡Se te acabó el tiempo!",
     prize: "Sigue participando",
-    condition: "¡Sigue intentando!",
+    condition: "¡Prueba de nuevo y sé más veloz!",
     level: "try-again",
     couponPrefix: "NONE"
   };

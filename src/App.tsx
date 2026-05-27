@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Play, Trophy, Star, Zap, Flame, Ghost, Gamepad2, ChevronRight, Wifi } from "lucide-react";
+import { X, Play, Trophy, Star, Zap, Flame, Ghost, Gamepad2, ChevronRight, ChevronLeft, Wifi, Brain } from "lucide-react";
 
 const GAMES = [
   {
@@ -12,13 +12,6 @@ const GAMES = [
     color: "#D1232B"
   },
   {
-    id: "calza-burger",
-    name: "Calza Burger",
-    description: "Arma la burger perfecta en el menor tiempo posible.",
-    icon: <Star className="w-8 h-8 text-orange-500" />,
-    color: "#5D3A2C"
-  },
-  {
     id: "deten-el-9",
     name: "Detén el 9",
     description: "Reflejos puros. Detén el cronómetro justo en el 9.00.",
@@ -26,25 +19,18 @@ const GAMES = [
     color: "#0D0D12"
   },
   {
-    id: "ruleta",
-    name: "Ruleta Ruta 9",
-    description: "Gira la rueda y descubre qué burger comerás hoy.",
-    icon: <Ghost className="w-8 h-8 text-purple-500" />,
+    id: "calza-burger",
+    name: "Arma la Burger",
+    description: "¡Gira la ruleta gourmet y selecciona los ingredientes correctos en tiempo récord!",
+    icon: <Gamepad2 className="w-8 h-8 text-red-500" />,
     color: "#D1232B"
   },
   {
-    id: "ruta-del-fuego",
-    name: "Ruta del Fuego",
-    description: "Esquiva los obstáculos y llega a la meta.",
-    icon: <Flame className="w-8 h-8 text-red-500" />,
-    color: "#ff5500"
-  },
-  {
-    id: "punto-perfecto",
-    name: "Punto Perfecto",
-    description: "Cocina la carne al punto exacto.",
-    icon: <Gamepad2 className="w-8 h-8 text-green-500" />,
-    color: "#22c55e"
+    id: "memoria-burger",
+    name: "Memoria Burger",
+    description: "Encuentra las 8 parejas de ingredientes gourmet antes de que se enfríe la plancha.",
+    icon: <Brain className="w-8 h-8 text-purple-500" />,
+    color: "#7C3AED"
   }
 ];
 
@@ -91,6 +77,39 @@ export default function App() {
   const [isWifiOpen, setIsWifiOpen] = useState(false);
   const [isKioskStarted, setIsKioskStarted] = useState(false);
   
+  // Navegación Horizontal Dinámica
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const scrollLeft = scrollRef.current.scrollLeft;
+    // Ancho aproximado de la tarjeta + gap (410px + 48px gap = ~458px)
+    const cardWidth = scrollRef.current.clientWidth > 768 ? 458 : 398;
+    const index = Math.round(scrollLeft / cardWidth);
+    setActiveIndex(Math.max(0, Math.min(index, GAMES.length - 1)));
+  };
+
+  const scrollToGame = (index: number) => {
+    if (!scrollRef.current) return;
+    const cardWidth = scrollRef.current.clientWidth > 768 ? 458 : 398;
+    scrollRef.current.scrollTo({ left: index * cardWidth, behavior: "smooth" });
+  };
+
+  const handlePrevCard = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (activeIndex > 0) {
+      scrollToGame(activeIndex - 1);
+    }
+  };
+
+  const handleNextCard = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (activeIndex < GAMES.length - 1) {
+      scrollToGame(activeIndex + 1);
+    }
+  };
+  
   // Estados para la encuesta de validación
   const [isSurveyOpen, setIsSurveyOpen] = useState(false);
   const [surveyIndex, setSurveyIndex] = useState(0);
@@ -102,7 +121,6 @@ export default function App() {
   const [lastTapTime, setLastTapTime] = useState(0);
   const [showTapFlash, setShowTapFlash] = useState(false);
 
-  // Auto-resetear el contador de toques si el usuario deja de tocar por más de 1.5 segundos
   useEffect(() => {
     if (secretTapCount > 0) {
       const timer = setTimeout(() => {
@@ -184,7 +202,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-r9-dark font-inter gradient-mesh">
+    <div className="relative w-full h-screen overflow-hidden bg-r9-dark font-inter gradient-mesh flex flex-col">
       <div className="noise-overlay" />
 
       {/* Header Bar */}
@@ -214,29 +232,6 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Survey Validation Card */}
-          <button 
-            onClick={() => {
-              setSurveyIndex(0);
-              setSurveyAnswers([]);
-              setSurveyCoupon("");
-              setIsSurveyOpen(true);
-            }}
-            className="group bg-r9-red/10 hover:bg-r9-red/20 hover:border-r9-gold/30 border border-r9-red/30 px-4 py-2 rounded-xl backdrop-blur-3xl shadow-xl flex items-center gap-3 transition-all duration-300 cursor-pointer"
-          >
-            <div className="relative">
-              <Star className="w-4 h-4 text-r9-gold group-hover:scale-110 transition-transform duration-300 fill-r9-gold" />
-              <span className="absolute -top-0.5 -right-0.5 flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-r9-gold opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-r9-gold"></span>
-              </span>
-            </div>
-            <div className="flex flex-col items-start text-left">
-              <span className="text-[8px] font-black uppercase tracking-widest text-white/40">PROYECTO TÓTEM</span>
-              <span className="text-[10px] font-black uppercase text-white/90 group-hover:text-r9-gold transition-colors">⭐ VALIDAR TÓTEM</span>
-            </div>
-          </button>
-
           {/* WiFi Connection Card */}
           <button 
             onClick={() => setIsWifiOpen(true)}
@@ -274,59 +269,122 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Grid */}
-      <main className="relative z-10 w-full h-full pt-32 px-16 pb-24 overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {GAMES.map((game, idx) => (
-            <motion.div
-              key={game.id}
-              initial={{ opacity: 0, scale: 0.9, y: 50 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: idx * 0.1, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <button
-                onClick={() => setActiveGame(game.id)}
-                className="group relative w-full aspect-[4/5.5] bg-r9-charcoal/40 backdrop-blur-xl border border-white/5 rounded-[3.5rem] overflow-hidden flex flex-col items-center justify-center p-12 transition-all duration-500 hover:scale-[1.03] hover:border-r9-red/30 active:scale-[0.98] shadow-2xl"
+
+
+      {/* Contenedor Flex Central para Agrupar las Tarjetas y los Puntos de Navegación Exactamente Juntos */}
+      <div className="relative flex-1 w-full flex flex-col justify-center items-center pt-24 pb-8 overflow-hidden z-10">
+        
+        {/* Main Horizontal Slider (Fijado a la altura exacta de las tarjetas) */}
+        <main 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="relative w-full overflow-x-auto overflow-y-hidden flex items-center scroll-smooth snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] h-[530px] md:h-[560px] shrink-0"
+        >
+          <div className="flex gap-12 px-16 md:px-32 w-max h-full items-center">
+            {GAMES.map((game, idx) => (
+              <motion.div
+                key={game.id}
+                initial={{ opacity: 0, scale: 0.9, x: 100 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                transition={{ delay: idx * 0.08, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="snap-center shrink-0 w-[380px] md:w-[410px] h-[520px] md:h-[550px] flex"
               >
-                {/* Game Icon Container */}
-                <div className="relative z-20 w-40 h-40 rounded-[3rem] bg-r9-dark flex items-center justify-center border border-white/5 group-hover:border-r9-red transition-all duration-700 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-r9-red/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  <div className="group-hover:scale-110 transition-transform duration-700 ease-out transform-gpu">
-                    {React.cloneElement(game.icon as React.ReactElement, { 
-                      className: `w-20 h-20 ${game.id === 'ruta-millonaria' ? 'text-r9-gold' : 'text-r9-red'}`,
-                      style: { filter: 'drop-shadow(0 0 20px currentColor)' }
-                    })}
+                <button
+                  onClick={() => setActiveGame(game.id)}
+                  onPointerDown={() => setActiveGame(game.id)}
+                  className="group relative w-full h-full bg-r9-charcoal/40 backdrop-blur-xl border border-white/5 rounded-[3.5rem] overflow-hidden flex flex-col items-center justify-center p-12 transition-all duration-500 hover:scale-[1.02] hover:border-r9-red/30 active:scale-[0.98] shadow-2xl select-none animate-fade-in"
+                >
+                  {/* Game Icon Container */}
+                  <div className="relative z-20 w-40 h-40 rounded-[3rem] bg-r9-dark flex items-center justify-center border border-white/5 group-hover:border-r9-red transition-all duration-700 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-r9-red/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="group-hover:scale-110 transition-transform duration-700 ease-out transform-gpu">
+                      {React.cloneElement(game.icon as React.ReactElement, { 
+                        className: `w-20 h-20 ${game.id === 'ruta-millonaria' ? 'text-r9-gold' : 'text-r9-red'}`,
+                        style: { filter: 'drop-shadow(0 0 20px currentColor)' }
+                      })}
+                    </div>
                   </div>
-                </div>
 
-                {/* Info */}
-                <div className="relative z-20 text-center mt-12">
-                  <h3 className="text-4xl font-black italic uppercase tracking-tighter text-white mb-4 group-hover:text-r9-gold transition-colors duration-500">
-                    {game.name}
-                  </h3>
-                  <div className="w-16 h-1 bg-r9-red/20 mx-auto mb-6 group-hover:w-32 group-hover:bg-r9-red transition-all duration-500" />
-                  <p className="text-base font-medium text-white/40 max-w-[280px] leading-relaxed group-hover:text-white/60 transition-colors duration-500">
-                    {game.description}
-                  </p>
-                </div>
+                  {/* Info */}
+                  <div className="relative z-20 text-center mt-12">
+                    <h3 className="text-4xl font-black italic uppercase tracking-tighter text-white mb-4 group-hover:text-r9-gold transition-colors duration-500">
+                      {game.name}
+                    </h3>
+                    <div className="w-16 h-1 bg-r9-red/20 mx-auto mb-6 group-hover:w-32 group-hover:bg-r9-red transition-all duration-500" />
+                    <p className="text-base font-medium text-white/40 max-w-[280px] leading-relaxed group-hover:text-white/60 transition-colors duration-500">
+                      {game.description}
+                    </p>
+                  </div>
 
-                {/* Launch Button */}
-                <div className="absolute bottom-12 z-20 flex flex-col items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-6 group-hover:translate-y-0">
-                   <div className="px-10 py-3 bg-r9-red text-white text-xs font-black uppercase tracking-[0.3em] rounded-full shadow-[0_10px_40px_rgba(210,31,45,0.4)] hover:bg-r9-red/90 transition-colors">
-                     INICIAR JUEGO
-                   </div>
-                </div>
+                  {/* Launch Button */}
+                  <div className="absolute bottom-12 z-20 flex flex-col items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-6 group-hover:translate-y-0">
+                     <div className="px-10 py-3 bg-r9-red text-white text-xs font-black uppercase tracking-[0.3em] rounded-full shadow-[0_10px_40px_rgba(210,31,45,0.4)] hover:bg-r9-red/90 transition-colors">
+                       INICIAR JUEGO
+                     </div>
+                  </div>
 
-                {/* Background Interactive Glow */}
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-all duration-1000 blur-[100px]"
-                  style={{ background: `radial-gradient(circle at center, ${game.color}, transparent 80%)` }}
+                  {/* Background Interactive Glow */}
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-all duration-1000 blur-[100px]"
+                    style={{ background: `radial-gradient(circle at center, ${game.color}, transparent 80%)` }}
+                  />
+                </button>
+              </motion.div>
+            ))}
+          </div>
+        </main>
+
+        {/* Paginator Indicators Control Bar (Dots de Navegación + Flechas Acopladas) */}
+        {!activeGame && (
+          <div className="z-30 flex items-center gap-6 bg-r9-charcoal/90 border border-white/10 px-6 py-3.5 rounded-full backdrop-blur-2xl shadow-2xl mt-8 shrink-0 select-none">
+            
+            {/* Flecha Izquierda Acoplada */}
+            <button
+              onPointerDown={handlePrevCard}
+              onClick={handlePrevCard}
+              disabled={activeIndex === 0}
+              className={`p-1.5 rounded-full transition-all duration-300 ${
+                activeIndex === 0 
+                  ? "opacity-10 cursor-not-allowed text-white/20" 
+                  : "opacity-80 hover:opacity-100 hover:scale-110 active:scale-90 text-r9-gold cursor-pointer"
+              }`}
+            >
+              <ChevronLeft className="w-5 h-5 text-glow-amber" />
+            </button>
+
+            {/* Dots Indicadores de Páginas */}
+            <div className="flex items-center gap-3">
+              {GAMES.map((_, i) => (
+                <button
+                  key={i}
+                  onPointerDown={() => scrollToGame(i)}
+                  onClick={() => scrollToGame(i)}
+                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                    activeIndex === i 
+                      ? "w-8 bg-gradient-to-r from-r9-red to-r9-gold shadow-[0_0_10px_rgba(255,184,0,0.6)]" 
+                      : "w-2 bg-white/20 hover:bg-white/40"
+                  }`}
                 />
-              </button>
-            </motion.div>
-          ))}
-        </div>
-      </main>
+              ))}
+            </div>
+
+            {/* Flecha Derecha Acoplada */}
+            <button
+              onPointerDown={handleNextCard}
+              onClick={handleNextCard}
+              disabled={activeIndex === GAMES.length - 1}
+              className={`p-1.5 rounded-full transition-all duration-300 ${
+                activeIndex === GAMES.length - 1 
+                  ? "opacity-10 cursor-not-allowed text-white/20" 
+                  : "opacity-80 hover:opacity-100 hover:scale-110 active:scale-90 text-r9-gold cursor-pointer"
+              }`}
+            >
+              <ChevronRight className="w-5 h-5 text-glow-amber" />
+            </button>
+
+          </div>
+        )}
+      </div>
 
       {/* Game Iframe Overlay */}
       <AnimatePresence>
@@ -419,7 +477,8 @@ export default function App() {
               {/* Close Button */}
               <button
                 onClick={() => setIsWifiOpen(false)}
-                className="absolute top-8 right-8 w-14 h-14 bg-white/5 hover:bg-r9-red hover:text-white border border-white/5 text-white/60 rounded-2xl flex items-center justify-center active:scale-95 transition-all duration-300 cursor-pointer"
+                onPointerDown={() => setIsWifiOpen(false)}
+                className="absolute top-8 right-8 w-14 h-14 bg-white/5 hover:bg-r9-red hover:text-white border border-white/5 text-white/60 rounded-2xl flex items-center justify-center active:scale-95 transition-all duration-300 cursor-pointer z-50"
               >
                 <X className="w-6 h-6" />
               </button>

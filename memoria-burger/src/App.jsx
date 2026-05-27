@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import BurgerMatcher from './components/BurgerMatcher';
-import { calculateBurgerMatchResult, generateCouponCode } from './utils/gameLogic';
+import MemoryGame from './components/MemoryGame';
+import { calculateMemoryMatchResult, generateCouponCode } from './utils/gameLogic';
 import { sounds } from './utils/sounds';
-import { Maximize, Minimize, RotateCcw, Brain, Trophy, Gamepad2 } from 'lucide-react';
+import { Maximize, Minimize, RotateCcw, Brain, Trophy } from 'lucide-react';
 
 function App() {
   const [gameState, setGameState] = useState('welcome'); // welcome, playing, result
-  const [playerData, setPlayerData] = useState({ name: 'Invitado', receipt: '0000' });
   const [result, setResult] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [attempts, setAttempts] = useState(0);
@@ -45,16 +44,14 @@ function App() {
     setGameState('playing');
   };
 
-  const handleStop = (finalScore) => {
-    sounds.playGameResult('perfect'); 
-    const gameResult = calculateBurgerMatchResult(finalScore);
+  const handleStop = (matchedPairsCount) => {
+    const gameResult = calculateMemoryMatchResult(matchedPairsCount);
     const coupon = gameResult.couponPrefix !== 'NONE' ? generateCouponCode(gameResult.couponPrefix) : null;
-    setResult({ ...gameResult, coupon });
-    setTimeout(() => setGameState('result'), 1000);
+    setResult({ ...gameResult, coupon, matchedPairsCount });
+    setTimeout(() => setGameState('result'), 600);
   };
 
   const resetGame = () => {
-    setPlayerData({ name: 'Invitado', receipt: '0000' });
     setGameState('welcome');
   };
 
@@ -62,9 +59,9 @@ function App() {
     /* Contenedor principal con estética Cyber-Grill (Fondo texturizado volcánico de alta fidelidad) */
     <div className="h-screen w-full bg-slate-950 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black select-none overflow-hidden flex flex-col font-sans p-4 relative">
       
-      {/* Luces de Neón Ambientales de Fondo de Gabinete */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-red-600/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-amber-500/10 blur-[120px] pointer-events-none" />
+      {/* Luces de Neón Ambientales de Fondo de Gabinete en Colores de Marca */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-r9-red/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-r9-gold/10 blur-[120px] pointer-events-none" />
 
       {/* Botón Pantalla Completa */}
       <button 
@@ -77,10 +74,10 @@ function App() {
       {/* Header Cabecera Arcade de Alto Impacto */}
       <header className="text-center py-4 z-10 shrink-0">
         <h1 className="text-3xl font-black italic tracking-tighter flex items-center justify-center gap-2">
-          <span className="text-white text-glow-cyan">RUTA</span>
+          <span className="text-white text-glow-red">RUTA</span>
           <span className="text-r9-red text-glow-red font-black">9</span> 
-          <span className="font-light opacity-50 uppercase tracking-widest text-xs border-l border-white/20 pl-2.5 ml-1">
-            Cyber-Grill Engine
+          <span className="font-light opacity-50 uppercase tracking-widest text-[9px] border-l border-white/20 pl-2.5 ml-1">
+            Precision Memory v1.0
           </span>
         </h1>
       </header>
@@ -89,7 +86,7 @@ function App() {
       <main className="flex-1 flex flex-col justify-center items-center relative z-10 w-full overflow-hidden">
         <AnimatePresence mode="wait">
           
-          {/* 1. WELCOME SCREEN (Pantalla de bienvenida interactiva de alta gama homologada) */}
+          {/* 1. WELCOME SCREEN */}
           {gameState === 'welcome' && (
             <motion.div 
               key="welcome"
@@ -101,26 +98,26 @@ function App() {
               <div className="space-y-4">
                 {/* Ícono animado de neón en gradiente de marca */}
                 <div className="w-20 h-20 bg-gradient-to-br from-r9-red to-r9-gold border-2 border-r9-gold rounded-[2rem] mx-auto flex items-center justify-center shadow-[0_0_35px_rgba(255,184,0,0.4)]">
-                  <Gamepad2 size={38} className="animate-pulse text-white" />
+                  <Brain size={38} className="animate-pulse text-white" />
                 </div>
 
                 <h2 className="text-4xl font-black uppercase leading-none tracking-tight text-white flex flex-col gap-1">
-                  <span>DESAFÍO</span>
-                  <span className="text-r9-gold text-glow-amber">ARMA LA BURGER</span>
+                  <span>MEMORIA</span>
+                  <span className="text-r9-gold text-glow-amber">BURGER</span>
                 </h2>
                 
                 <p className="text-slate-400 text-sm leading-relaxed max-w-sm mx-auto">
-                  La plancha de Ruta 9 está encendida. Memoriza la comanda del cliente y apila los ingredientes correctos de forma veloz para despachar hamburguesas perfectas.
+                  La plancha de Ruta 9 esconde los mejores ingredientes. Voltea las cartas y encuentra las 8 parejas antes de que termine el tiempo para ganar espectaculares premios de nuestra marca.
                 </p>
               </div>
 
               {/* Tarjeta de Instrucciones Glassmorphic */}
               <div className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-left space-y-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
-                <p className="text-[10px] font-black text-r9-gold uppercase tracking-widest text-glow-amber">💡 CÓMO JUGAR:</p>
+                <p className="text-[10px] font-black text-r9-gold uppercase tracking-widest text-glow-amber">💡 REGLAS DE LA PLANCHA R9:</p>
                 <ul className="text-xs text-slate-300 space-y-1.5 list-disc pl-4 font-semibold">
-                  <li>Observa el orden exacto pedido por el cliente.</li>
-                  <li>Toca los ingredientes de la grilla de abajo a arriba.</li>
-                  <li>¡Completa 3 comandas para ganar el premio mayor!</li>
+                  <li>Toca cualquier carta para ver su ingrediente gourmet.</li>
+                  <li>Encuentra su pareja en la plancha antes que se enfríe.</li>
+                  <li>Tienes 45 segundos. ¡Cada acierto te acerca al premio!</li>
                 </ul>
               </div>
 
@@ -131,7 +128,7 @@ function App() {
                   bg-gradient-to-r from-r9-red to-r9-gold border-2 border-r9-gold cursor-pointer transition-all duration-200
                   active:scale-95 shadow-[0_0_25px_rgba(255,184,0,0.5)] text-shadow-glow"
               >
-                🎮 INICIAR COCCIÓN
+                🎮 ENCENDER LA PLANCHA
               </button>
             </motion.div>
           )}
@@ -144,11 +141,11 @@ function App() {
               animate={{ opacity: 1 }} 
               className="flex-1 w-full flex flex-col overflow-hidden"
             >
-              <BurgerMatcher onStop={handleStop} />
+              <MemoryGame onStop={handleStop} />
             </motion.div>
           )}
 
-          {/* 3. RESULT SCREEN (Pantalla de premios y canje premium homologada) */}
+          {/* 3. RESULT SCREEN */}
           {gameState === 'result' && result && (
             <motion.div 
               key="result"
@@ -161,8 +158,9 @@ function App() {
                   <Trophy size={38} className="text-white animate-bounce" />
                 </div>
 
-                <h3 className="text-r9-gold font-black uppercase tracking-[0.2em] text-xs text-glow-amber">RESULTADO DE COCINA</h3>
+                <h3 className="text-r9-gold font-black uppercase tracking-[0.2em] text-xs text-glow-amber">DESAFÍO COMPLETADO</h3>
                 <p className="text-3xl font-black uppercase leading-none tracking-tight text-white italic">{result.message}</p>
+                <p className="text-slate-400 text-xs font-semibold">Parejas encontradas: <span className="text-r9-gold font-bold">{result.matchedPairsCount} / 8</span></p>
               </div>
 
               {/* Contenedor del Cupón con Estilo Ticket de Entrada */}
@@ -183,13 +181,13 @@ function App() {
                   onPointerDown={resetGame}
                   className="w-full py-5 bg-slate-900 border border-slate-800 rounded-2xl font-black flex items-center justify-center gap-3 uppercase text-sm text-white active:scale-95 transition-all cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
                 >
-                  <RotateCcw size={16} /> NUEVA COMANDA
+                  <RotateCcw size={16} /> NUEVA PLANCHA
                 </button>
                 <button 
                   onPointerDown={() => window.parent.postMessage({ type: 'EXIT_GAME' }, '*')}
                   className="w-full py-5 bg-gradient-to-r from-r9-red to-r9-gold border-2 border-r9-gold rounded-2xl font-black flex items-center justify-center gap-3 uppercase text-sm text-glow-red text-white active:scale-95 transition-all cursor-pointer shadow-[0_0_20px_rgba(210,31,45,0.4)]"
                 >
-                  VOLVER A MENÚ
+                  VOLVER A JUEGOS
                 </button>
               </div>
             </motion.div>
@@ -199,7 +197,7 @@ function App() {
       </main>
 
       <footer className="text-center py-2 opacity-25 text-[8px] uppercase tracking-[0.4em] z-10 shrink-0">
-        Ruta9 Precision Burger Engine v2.0
+        Ruta9 Precision Memory Engine v1.0
       </footer>
     </div>
   );

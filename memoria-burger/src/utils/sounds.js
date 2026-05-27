@@ -174,7 +174,7 @@ class SoundEngine {
                 }
 
                 setTimeout(() => {
-                    this.announce("¡Espectacular! ¡Encontraste todas las parejas de la plancha! ¡Te ganaste tres cupones para el sorteo semanal!");
+                    this.announce("¡Espectacular! ¡Encontraste todas las parejas de la plancha! ¡Te ganaste una Hamburguesa Promo Ruta 9 Gratis!");
                 }, 180);
                 
             } else if (level === 'excellent') {
@@ -204,7 +204,7 @@ class SoundEngine {
                 });
 
                 setTimeout(() => {
-                    this.announce("¡Increíble memoria! ¡Excelente juego! ¡Te ganaste papas gratis!");
+                    this.announce("¡Increíble memoria! ¡Excelente juego! ¡Te ganaste unas papas fritas gratis!");
                 }, 150);
                 
             } else if (level === 'good') {
@@ -234,7 +234,7 @@ class SoundEngine {
                 });
 
                 setTimeout(() => {
-                    this.announce("¡Buen juego! ¡Te ganaste una salsa gratis!");
+                    this.announce("¡Buen juego! ¡Te ganaste una salsa premium gratis!");
                 }, 150);
                 
             } else if (level === 'regular') {
@@ -258,7 +258,7 @@ class SoundEngine {
                 });
 
                 setTimeout(() => {
-                    this.announce("¡Se te acabó el tiempo! ¡Sigue participando!");
+                    this.announce("¡Se te acabó el tiempo en la plancha! ¡Sigue participando!");
                 }, 150);
 
             } else {
@@ -292,7 +292,7 @@ class SoundEngine {
                 });
 
                 setTimeout(() => {
-                    this.announce("¡Se te acabó el tiempo! ¡Sigue participando!");
+                    this.announce("¡Se te acabó el tiempo en la plancha! ¡Sigue participando!");
                 }, 150);
             }
         } catch (e) {

@@ -1,59 +1,59 @@
 export const ROULETTE_PRIZES = [
   {
-    id: "salsa-premium",
+    id: "salsa-gratis",
     label: "SALSA GRATIS",
     condition: "Comprando burger",
     weight: 25,
-    color: "#D21F2D"
+    color: "#C52026"
   },
   {
-    id: "proxima-compra-10",
-    label: "10% DSCTO.",
-    condition: "Válido en próxima visita",
-    weight: 25,
-    color: "#1A1A1A"
-  },
-  {
-    id: "gracias",
-    label: "GRACIAS",
-    condition: "Sin beneficio directo",
-    weight: 15,
-    color: "#FFB800"
-  },
-  {
-    id: "bebida-descuento",
-    label: "BEBIDA PROMO",
-    condition: "Solo comprando combo",
-    weight: 12,
-    color: "#D21F2D"
-  },
-  {
-    id: "upgrade-papas",
-    label: "UPGRADE PAPAS",
-    condition: "Solo comprando combo",
-    weight: 10,
-    color: "#1A1A1A"
-  },
-  {
-    id: "segundo-giro",
-    label: "GIRO EXTRA",
-    condition: "Máximo una vez por pedido",
-    weight: 7,
-    color: "#FFB800"
-  },
-  {
-    id: "sorteo-semanal",
-    label: "SORTEO SEMANAL",
-    condition: "Sujeto a sorteo semanal",
-    weight: 5,
-    color: "#D21F2D"
+    id: "sigue-participando",
+    label: "SIGUE JUGANDO",
+    condition: "¡Sigue participando!",
+    weight: 30,
+    color: "#111111"
   },
   {
     id: "papas-gratis",
     label: "PAPAS GRATIS",
-    condition: "Sujeto a disponibilidad diaria",
-    weight: 1,
+    condition: "Solo en caja",
+    weight: 15,
     color: "#FFB800"
+  },
+  {
+    id: "sigue-participando",
+    label: "SIGUE JUGANDO",
+    condition: "¡Sigue participando!",
+    weight: 30,
+    color: "#111111"
+  },
+  {
+    id: "sorteo-promo",
+    label: "3 COPIAS SORTEO",
+    condition: "3 cupones de sorteo por promo burger por 2",
+    weight: 5,
+    color: "#C52026"
+  },
+  {
+    id: "sigue-participando",
+    label: "SIGUE JUGANDO",
+    condition: "¡Sigue participando!",
+    weight: 30,
+    color: "#111111"
+  },
+  {
+    id: "salsa-gratis",
+    label: "SALSA GRATIS",
+    condition: "Comprando burger",
+    weight: 25,
+    color: "#C52026"
+  },
+  {
+    id: "sigue-participando",
+    label: "SIGUE JUGANDO",
+    condition: "¡Sigue participando!",
+    weight: 30,
+    color: "#111111"
   }
 ];
 
