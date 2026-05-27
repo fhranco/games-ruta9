@@ -2,6 +2,13 @@
   "version": 2,
   "cleanUrls": true,
   "rewrites": [
+    { "source": "/games/calza-burger/assets/(.*)", "destination": "/games/calza-burger/assets/$1" },
+    { "source": "/games/deten-el-9/assets/(.*)", "destination": "/games/deten-el-9/assets/$1" },
+    { "source": "/games/punto-perfecto/assets/(.*)", "destination": "/games/punto-perfecto/assets/$1" },
+    { "source": "/games/ruleta/assets/(.*)", "destination": "/games/ruleta/assets/$1" },
+    { "source": "/games/ruta-del-fuego/assets/(.*)", "destination": "/games/ruta-del-fuego/assets/$1" },
+    { "source": "/games/ruta-millonaria/assets/(.*)", "destination": "/games/ruta-millonaria/assets/$1" },
+    { "source": "/games/memoria-burger/assets/(.*)", "destination": "/games/memoria-burger/assets/$1" },
     { "source": "/games/calza-burger/(.*)", "destination": "/games/calza-burger/$1" },
     { "source": "/games/deten-el-9/(.*)", "destination": "/games/deten-el-9/$1" },
     { "source": "/games/punto-perfecto/(.*)", "destination": "/games/punto-perfecto/$1" },
