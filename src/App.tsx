@@ -772,7 +772,7 @@ export default function App() {
                RUTA 9 <span className="text-r9-red">EXCLUSIVE</span> EXPERIENCE
              </p>
              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">
-               Creado por Agencia PatagoniaCoach • v1.1.0 (Build: 2026-05-27)
+               Creado por Agencia PatagoniaCoach • v1.2.0 (Build: 2026-05-28 16:33:54)
              </p>
           </div>
         </div>
