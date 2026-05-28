@@ -1,59 +1,43 @@
 export const ROULETTE_PRIZES = [
   {
-    id: "salsa-gratis",
-    label: "SALSA GRATIS",
-    condition: "Comprando burger",
-    weight: 25,
+    id: "descuento-r9",
+    label: "DESCUENTO R9",
     color: "#C52026"
   },
   {
-    id: "sigue-participando",
+    id: "sigue-jugando",
     label: "SIGUE JUGANDO",
-    condition: "¡Sigue participando!",
-    weight: 30,
     color: "#111111"
   },
   {
-    id: "papas-gratis",
-    label: "PAPAS GRATIS",
-    condition: "Solo en caja",
-    weight: 15,
+    id: "helado-soft",
+    label: "HELADO SOFT",
     color: "#FFB800"
   },
   {
-    id: "sigue-participando",
+    id: "sigue-jugando",
     label: "SIGUE JUGANDO",
-    condition: "¡Sigue participando!",
-    weight: 30,
     color: "#111111"
   },
   {
-    id: "sorteo-promo",
-    label: "3 COPIAS SORTEO",
-    condition: "3 cupones de sorteo por promo burger por 2",
-    weight: 5,
+    id: "papas-fritas",
+    label: "PAPAS FRITAS",
     color: "#C52026"
   },
   {
-    id: "sigue-participando",
+    id: "sigue-jugando",
     label: "SIGUE JUGANDO",
-    condition: "¡Sigue participando!",
-    weight: 30,
     color: "#111111"
   },
   {
-    id: "salsa-gratis",
-    label: "SALSA GRATIS",
-    condition: "Comprando burger",
-    weight: 25,
+    id: "schop-bebida",
+    label: "BEBIDA/SCHOP",
+    color: "#FFB800"
+  },
+  {
+    id: "regalo-sorpresa",
+    label: "SORPRESA R9",
     color: "#C52026"
-  },
-  {
-    id: "sigue-participando",
-    label: "SIGUE JUGANDO",
-    condition: "¡Sigue participando!",
-    weight: 30,
-    color: "#111111"
   }
 ];
 
@@ -74,7 +58,7 @@ export function selectWeightedPrize() {
 
 export const calculateRotation = (prizeIndex) => {
   const segmentAngle = 360 / ROULETTE_PRIZES.length;
-  const extraSpins = 6 + Math.floor(Math.random() * 4);
+  const extraSpins = 10 + Math.floor(Math.random() * 5);
   const prizeOffset = -(prizeIndex * segmentAngle) - (segmentAngle / 2);
   
   return (extraSpins * 360) + prizeOffset;

@@ -31,23 +31,82 @@ export default function ResultScreen({ result, playerData, onReset }) {
   useEffect(() => {
     if (hasSaved.current) return;
     
-    const res = calculateResult(result);
-    setOutcome(res);
+    const localRes = calculateResult(result);
     
-    // Play win sound
-    sounds.playGameResult(res.level);
+    const resolveOutcome = async () => {
+      // Si el resultado local es de pérdida, no hay necesidad de reclamar premio físico
+      if (localRes.level === 'try-again') {
+        setOutcome({ ...localRes, couponCode: "" });
+        sounds.playGameResult(localRes.level);
+        return;
+      }
 
-    // Persistir jugada (Solo una vez)
-    storage.savePlay({
-      id: Math.random().toString(36).substr(2, 9),
-      playerName: playerData.name,
-      receipt: playerData.receipt,
-      stoppedTime: result,
-      score: res.score,
-      message: res.message,
-      prize: res.prize
-    });
+      try {
+        const apiHost = window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
+        const response = await fetch(`${apiHost}/api/claim-skill-prize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gameId: "deten-el-9",
+            playerName: playerData.name || "Invitado",
+            receipt: playerData.receipt || "0000",
+            skillSuccessful: true
+          })
+        });
 
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === "GANADOR") {
+            setOutcome({
+              score: localRes.score,
+              message: "¡HAS GANADO!",
+              prize: data.label,
+              couponCode: data.couponCode,
+              level: localRes.level
+            });
+            sounds.playGameResult(localRes.level);
+            
+            // Persistir jugada ganadora localmente
+            storage.savePlay({
+              id: Math.random().toString(36).substr(2, 9),
+              playerName: playerData.name || "Invitado",
+              receipt: playerData.receipt || "0000",
+              stoppedTime: result,
+              score: localRes.score,
+              message: "¡HAS GANADO!",
+              prize: data.label,
+              couponCode: data.couponCode
+            });
+          } else {
+            // Forzar pérdida si no queda stock
+            const forcedLose = {
+              score: 10,
+              message: "¡Sigue participando!",
+              prize: "Vuelve mañana por otro intento",
+              level: "try-again",
+              couponCode: ""
+            };
+            setOutcome(forcedLose);
+            sounds.playGameResult("try-again");
+          }
+        } else {
+          throw new Error('API falló');
+        }
+      } catch (err) {
+        console.warn("⚠️ Error en reclamo de premio central. Usando contingencia offline (Pérdida).", err.message);
+        const forcedLose = {
+          score: 10,
+          message: "¡Sigue participando!",
+          prize: "Vuelve mañana por otro intento",
+          level: "try-again",
+          couponCode: ""
+        };
+        setOutcome(forcedLose);
+        sounds.playGameResult("try-again");
+      }
+    };
+
+    resolveOutcome();
     hasSaved.current = true;
   }, [result, playerData]);
 
@@ -65,14 +124,21 @@ export default function ResultScreen({ result, playerData, onReset }) {
           <h2 className="text-9xl font-black text-white italic tracking-tighter">{result.toFixed(3)}s</h2>
         </div>
 
-        <div className="py-12 px-6 bg-r9-charcoal/50 rounded-[40px] border-4 border-r9-gold relative overflow-hidden">
-            {outcome.level === 'perfect' && (
-                <div className="absolute inset-0 bg-r9-gold/10 animate-pulse" />
+        <div className="py-10 px-6 bg-r9-charcoal/50 rounded-[40px] border-4 border-r9-gold relative overflow-hidden">
+            {(outcome.level === 'perfect' || outcome.level === 'excellent') && (
+                <div className="absolute inset-0 bg-r9-gold/5 animate-pulse pointer-events-none" />
             )}
-            <h3 className="text-2xl font-black text-r9-gold uppercase mb-4 tracking-tight">{outcome.message}</h3>
+            <h3 className="text-xl font-black text-r9-gold uppercase mb-3 tracking-wider">{outcome.message}</h3>
             <div className="space-y-2">
-                <p className="text-6xl font-black text-white uppercase leading-none">{outcome.prize.split(' ')[0]}</p>
-                <p className="text-2xl font-light text-white/60 uppercase tracking-widest">Cupones Ganados</p>
+                <p className="text-3xl font-black text-white uppercase leading-tight tracking-tight px-2">{outcome.prize}</p>
+                {outcome.couponCode ? (
+                  <div className="mt-6 pt-4 border-t border-white/10">
+                    <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] mb-1.5 font-bold">CÓDIGO DE VALIDACIÓN</p>
+                    <p className="text-2xl font-mono font-black text-[#FFB800] tracking-widest select-all">{outcome.couponCode}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm font-light text-white/40 uppercase tracking-widest mt-1">Intenta nuevamente</p>
+                )}
             </div>
         </div>
 
@@ -84,13 +150,13 @@ export default function ResultScreen({ result, playerData, onReset }) {
       <div className="space-y-4">
         <button 
           onPointerDown={handleResetPress}
-          className={`w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest transition-all active:scale-95 bg-white/5 border-2 border-white/10 text-white cursor-pointer select-none touch-none ${!canInteract ? 'opacity-50' : 'hover:bg-white/10'}`}
+          className={`w-full py-5 sm:py-6 rounded-2xl font-black text-lg sm:text-xl uppercase tracking-widest transition-all active:scale-95 bg-[#C52026] text-white border-2 border-[#C52026] shadow-[0_10px_25px_rgba(197,32,38,0.4)] cursor-pointer select-none touch-none ${!canInteract ? 'opacity-50' : 'hover:bg-[#C52026]/90'}`}
         >
           NUEVO JUEGO
         </button>
         <button 
           onPointerDown={handleExitPress}
-          className={`w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest transition-all active:scale-95 bg-r9-gold text-r9-dark cursor-pointer select-none touch-none shadow-[0_8px_0_0_#C48D00] ${!canInteract ? 'opacity-50' : 'hover:bg-[#FFC833]'}`}
+          className={`w-full py-5 sm:py-6 rounded-2xl font-black text-lg sm:text-xl uppercase tracking-widest transition-all active:scale-95 bg-transparent text-white/20 border-2 border-white/5 cursor-pointer select-none touch-none ${!canInteract ? 'opacity-50' : 'hover:text-white/40 hover:bg-white/5'}`}
         >
           VOLVER A JUEGOS
         </button>

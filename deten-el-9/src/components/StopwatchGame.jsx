@@ -9,6 +9,26 @@ export default function StopwatchGame({ onFinished }) {
   const isRunningRef = useRef(true);
   const startTimeRef = useRef(performance.now());
   const requestRef = useRef();
+  const [canWin, setCanWin] = useState(false);
+
+  useEffect(() => {
+    const checkStock = async () => {
+      try {
+        const apiHost = window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
+        const response = await fetch(`${apiHost}/api/can-win?gameId=deten-el-9`);
+        if (response.ok) {
+          const data = await response.json();
+          setCanWin(data.canWin);
+        } else {
+          setCanWin(false);
+        }
+      } catch (err) {
+        console.warn('⚠️ Offline o error de conexión al servidor de stock. canWin desactivado por seguridad.', err.message);
+        setCanWin(false);
+      }
+    };
+    checkStock();
+  }, []);
 
   const animate = (now) => {
     if (isRunningRef.current) {
@@ -52,7 +72,17 @@ export default function StopwatchGame({ onFinished }) {
     sounds.stopMotor();
     sounds.playStop();
     cancelAnimationFrame(requestRef.current);
-    const stoppedAt = time;
+    
+    let stoppedAt = time;
+    if (!canWin) {
+      const diff = Math.abs(stoppedAt - 9.00);
+      if (diff <= 0.05) {
+        // Inyectar error matemático sutil para forzar pérdida (> 0.05s de diferencia)
+        const sign = stoppedAt >= 9.00 ? 1 : -1;
+        stoppedAt = 9.00 + sign * (0.052 + Math.random() * 0.01);
+        setTime(stoppedAt);
+      }
+    }
     
     setTimeout(() => {
       onFinished(stoppedAt);

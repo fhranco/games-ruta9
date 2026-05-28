@@ -53,23 +53,58 @@ function App() {
     sounds.startMusic();
   };
 
-  const handleFinish = (finalCorrect) => {
+  const handleFinish = async (finalCorrect) => {
     setCorrectCount(finalCorrect);
     const gameResult = calculateTriviaResult(finalCorrect);
-    const coupon = generateCouponCode(gameResult.couponPrefix);
-    setResult({ ...gameResult, correctAnswers: finalCorrect, coupon });
     sounds.stopMusic();
-    
-    // Reproducir fanfarria retro de victoria o derrota según si obtuvo premio (score >= 50)
-    if (gameResult.score >= 50) {
-      sounds.playWin();
-    } else {
+
+    if (finalCorrect < 3) {
+      setResult({ ...gameResult, correctAnswers: finalCorrect, coupon: "" });
+      sounds.playLose();
+      setGameState('result');
+      return;
+    }
+
+    try {
+      const apiHost = window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
+      const response = await fetch(`${apiHost}/api/claim-skill-prize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameId: "ruta-millonaria",
+          playerName: "Invitado",
+          receipt: "0000",
+          skillSuccessful: true
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === "GANADOR") {
+          setResult({
+            ...gameResult,
+            correctAnswers: finalCorrect,
+            prize: data.label,
+            coupon: data.couponCode
+          });
+          sounds.playWin();
+        } else {
+          // Forzar pérdida si no queda stock
+          const forcedLose = calculateTriviaResult(0);
+          setResult({ ...forcedLose, correctAnswers: finalCorrect, coupon: "" });
+          sounds.playLose();
+        }
+      } else {
+        throw new Error('API falló');
+      }
+    } catch (err) {
+      console.warn("⚠️ Error en reclamo de premio central. Usando contingencia offline (Pérdida).", err.message);
+      const forcedLose = calculateTriviaResult(0);
+      setResult({ ...forcedLose, correctAnswers: finalCorrect, coupon: "" });
       sounds.playLose();
     }
-    
-    setTimeout(() => {
-      setGameState('result');
-    }, 1000);
+
+    setGameState('result');
   };
 
   const resetGame = (e) => {
@@ -137,7 +172,7 @@ function App() {
             <div className="w-full max-w-xs space-y-6 mt-12">
               <button 
                 onPointerDown={handleStart}
-                className={`group w-full py-7 bg-[#C52026] hover:bg-[#C52026]/90 rounded-[2.5rem] font-black text-lg shadow-[0_10px_30px_rgba(197,32,38,0.4)] active:translate-y-1 active:shadow-none transition-all uppercase tracking-widest cursor-pointer border border-[#C52026]/50 flex items-center justify-center gap-2 select-none touch-none ${!canInteract ? 'opacity-50' : ''}`}
+                className={`group w-full py-5 sm:py-7 bg-[#C52026] hover:bg-[#C52026]/90 rounded-[2.5rem] font-black text-base sm:text-lg shadow-[0_10px_30px_rgba(197,32,38,0.4)] active:translate-y-1 active:shadow-none transition-all uppercase tracking-widest cursor-pointer border border-[#C52026]/50 flex items-center justify-center gap-2 select-none touch-none ${!canInteract ? 'opacity-50' : ''}`}
               >
                 COMENZAR DESAFÍO
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -209,13 +244,13 @@ function App() {
             <div className="w-full max-w-xs space-y-4 mt-8">
               <button 
                 onPointerDown={resetGame}
-                className={`w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest transition-all active:scale-95 bg-white/5 border-2 border-white/10 text-white cursor-pointer select-none touch-none ${!canInteract ? 'opacity-50' : 'hover:bg-white/10'}`}
+                className={`w-full py-5 sm:py-6 rounded-2xl font-black text-lg sm:text-xl uppercase tracking-widest transition-all active:scale-95 bg-[#C52026] text-white border-2 border-[#C52026] shadow-[0_10px_25px_rgba(197,32,38,0.4)] cursor-pointer select-none touch-none ${!canInteract ? 'opacity-50' : 'hover:bg-[#C52026]/90'}`}
               >
                 NUEVO DESAFÍO
               </button>
               <button 
                 onPointerDown={exitGame}
-                className={`w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest transition-all active:scale-95 bg-r9-gold text-r9-dark cursor-pointer select-none touch-none shadow-[0_8px_0_0_#C48D00] ${!canInteract ? 'opacity-50' : 'hover:bg-[#FFC833]'}`}
+                className={`w-full py-5 sm:py-6 rounded-2xl font-black text-lg sm:text-xl uppercase tracking-widest transition-all active:scale-95 bg-transparent text-white/20 border-2 border-white/5 cursor-pointer select-none touch-none ${!canInteract ? 'opacity-50' : 'hover:text-white/40 hover:bg-white/5'}`}
               >
                 VOLVER A JUEGOS
               </button>

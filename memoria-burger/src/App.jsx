@@ -44,10 +44,51 @@ function App() {
     setGameState('playing');
   };
 
-  const handleStop = (matchedPairsCount) => {
+  const handleStop = async (matchedPairsCount) => {
     const gameResult = calculateMemoryMatchResult(matchedPairsCount);
-    const coupon = gameResult.couponPrefix !== 'NONE' ? generateCouponCode(gameResult.couponPrefix) : null;
-    setResult({ ...gameResult, coupon, matchedPairsCount });
+
+    if (matchedPairsCount < 4) {
+      setResult({ ...gameResult, coupon: null, matchedPairsCount });
+      setTimeout(() => setGameState('result'), 600);
+      return;
+    }
+
+    try {
+      const apiHost = window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
+      const response = await fetch(`${apiHost}/api/claim-skill-prize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameId: "memoria-burger",
+          playerName: "Invitado",
+          receipt: "0000",
+          skillSuccessful: true
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === "GANADOR") {
+          setResult({
+            ...gameResult,
+            prize: data.label,
+            coupon: data.couponCode,
+            matchedPairsCount
+          });
+        } else {
+          // Forzar pérdida si no queda stock
+          const forcedLose = calculateMemoryMatchResult(0);
+          setResult({ ...forcedLose, coupon: null, matchedPairsCount });
+        }
+      } else {
+        throw new Error('API falló');
+      }
+    } catch (err) {
+      console.warn("⚠️ Error en reclamo de premio central. Usando contingencia offline (Pérdida).", err.message);
+      const forcedLose = calculateMemoryMatchResult(0);
+      setResult({ ...forcedLose, coupon: null, matchedPairsCount });
+    }
+
     setTimeout(() => setGameState('result'), 600);
   };
 
@@ -117,14 +158,14 @@ function App() {
                 <ul className="text-xs text-slate-300 space-y-1.5 list-disc pl-4 font-semibold">
                   <li>Toca cualquier carta para ver su ingrediente gourmet.</li>
                   <li>Encuentra su pareja en la plancha antes que se enfríe.</li>
-                  <li>Tienes 45 segundos. ¡Cada acierto te acerca al premio!</li>
+                  <li>Tienes 30 segundos. ¡Cada acierto te acerca al premio!</li>
                 </ul>
               </div>
 
               {/* Botón de Impacto Neón R9 */}
               <button 
                 onPointerDown={handleStart}
-                className="w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest text-white
+                className="w-full py-5 sm:py-6 rounded-2xl font-black text-lg sm:text-xl uppercase tracking-widest text-white
                   bg-gradient-to-r from-r9-red to-r9-gold border-2 border-r9-gold cursor-pointer transition-all duration-200
                   active:scale-95 shadow-[0_0_25px_rgba(255,184,0,0.5)] text-shadow-glow"
               >
@@ -179,13 +220,13 @@ function App() {
               <div className="flex flex-col gap-4 w-full">
                 <button 
                   onPointerDown={resetGame}
-                  className="w-full py-5 bg-slate-900 border border-slate-800 rounded-2xl font-black flex items-center justify-center gap-3 uppercase text-sm text-white active:scale-95 transition-all cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+                  className="w-full py-5 bg-[#C52026] text-white border border-[#C52026] rounded-2xl font-black flex items-center justify-center gap-3 uppercase text-sm active:scale-95 transition-all cursor-pointer shadow-[0_8px_20px_rgba(197,32,38,0.3)] hover:bg-[#C52026]/90"
                 >
                   <RotateCcw size={16} /> NUEVA PLANCHA
                 </button>
                 <button 
                   onPointerDown={() => window.parent.postMessage({ type: 'EXIT_GAME' }, '*')}
-                  className="w-full py-5 bg-gradient-to-r from-r9-red to-r9-gold border-2 border-r9-gold rounded-2xl font-black flex items-center justify-center gap-3 uppercase text-sm text-glow-red text-white active:scale-95 transition-all cursor-pointer shadow-[0_0_20px_rgba(210,31,45,0.4)]"
+                  className="w-full py-5 bg-transparent text-white/20 border border-white/5 rounded-2xl font-black flex items-center justify-center gap-3 uppercase text-sm active:scale-95 transition-all cursor-pointer hover:text-white/40 hover:bg-white/5"
                 >
                   VOLVER A JUEGOS
                 </button>

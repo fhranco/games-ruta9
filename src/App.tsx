@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Play, Trophy, Star, Zap, Flame, Ghost, Gamepad2, ChevronRight, ChevronLeft, Wifi, Brain } from "lucide-react";
+import { X, Play, Trophy, Star, Zap, Flame, Ghost, Gamepad2, ChevronRight, ChevronLeft, Wifi, Brain, RotateCw } from "lucide-react";
 
 const GAMES = [
   {
@@ -31,6 +31,13 @@ const GAMES = [
     description: "Encuentra las 8 parejas de ingredientes gourmet antes de que se enfríe la plancha.",
     icon: <Brain className="w-8 h-8 text-purple-500" />,
     color: "#7C3AED"
+  },
+  {
+    id: "ruleta",
+    name: "Ruleta Ruta 9",
+    description: "¡Gira la ruleta gourmet y gana espectaculares cupones y premios al instante!",
+    icon: <RotateCw className="w-8 h-8 text-yellow-500" />,
+    color: "#FFB800"
   }
 ];
 
@@ -299,7 +306,7 @@ export default function App() {
                     <div className="absolute inset-0 bg-gradient-to-t from-r9-red/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     <div className="group-hover:scale-110 transition-transform duration-700 ease-out transform-gpu">
                       {React.cloneElement(game.icon as React.ReactElement, { 
-                        className: `w-20 h-20 ${game.id === 'ruta-millonaria' ? 'text-r9-gold' : 'text-r9-red'}`,
+                        className: `w-20 h-20 ${game.id === 'ruta-millonaria' || game.id === 'ruleta' ? 'text-r9-gold' : 'text-r9-red'}`,
                         style: { filter: 'drop-shadow(0 0 20px currentColor)' }
                       })}
                     </div>

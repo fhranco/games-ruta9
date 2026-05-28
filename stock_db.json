@@ -1,0 +1,136 @@
+{
+  "lastUpdated": "2026-05-27T19:22:00Z",
+  "deliveredCount": 0,
+  "gameStock": {
+    "ruleta": {
+      "DESCUENTO_30": 1,
+      "DESCUENTO_20": 5,
+      "DESCUENTO_10": 20,
+      "HELADO_SOFT": 18,
+      "PAPAS_FRITAS": 8,
+      "SCHOP_BEBIDA": 6,
+      "REGALO_SORPRESA": 6
+    },
+    "deten-el-9": {
+      "DESCUENTO_30": 1,
+      "HELADO_SOFT": 3,
+      "PAPAS_FRITAS": 3
+    },
+    "ruta-millonaria": {
+      "DESCUENTO_20": 2,
+      "SCHOP_BEBIDA": 5,
+      "REGALO_SORPRESA": 4,
+      "HELADO_SOFT": 3,
+      "PAPAS_FRITAS": 3
+    },
+    "calza-burger": {
+      "DESCUENTO_20": 2,
+      "SCHOP_BEBIDA": 4,
+      "REGALO_SORPRESA": 5,
+      "HELADO_SOFT": 3,
+      "PAPAS_FRITAS": 3
+    },
+    "memoria-burger": {
+      "DESCUENTO_20": 1,
+      "SCHOP_BEBIDA": 5,
+      "REGALO_SORPRESA": 5,
+      "HELADO_SOFT": 3,
+      "PAPAS_FRITAS": 3
+    }
+  },
+  "blockRelease": {
+    "1": {
+      "DESCUENTO_30": 1,
+      "DESCUENTO_20": 2,
+      "DESCUENTO_10": 4,
+      "HELADO_SOFT": 6,
+      "PAPAS_FRITAS": 4,
+      "SCHOP_BEBIDA": 4,
+      "REGALO_SORPRESA": 4
+    },
+    "2": {
+      "DESCUENTO_30": 0,
+      "DESCUENTO_20": 2,
+      "DESCUENTO_10": 4,
+      "HELADO_SOFT": 6,
+      "PAPAS_FRITAS": 4,
+      "SCHOP_BEBIDA": 4,
+      "REGALO_SORPRESA": 4
+    },
+    "3": {
+      "DESCUENTO_30": 0,
+      "DESCUENTO_20": 2,
+      "DESCUENTO_10": 4,
+      "HELADO_SOFT": 6,
+      "PAPAS_FRITAS": 4,
+      "SCHOP_BEBIDA": 4,
+      "REGALO_SORPRESA": 4
+    },
+    "4": {
+      "DESCUENTO_30": 1,
+      "DESCUENTO_20": 2,
+      "DESCUENTO_10": 4,
+      "HELADO_SOFT": 6,
+      "PAPAS_FRITAS": 4,
+      "SCHOP_BEBIDA": 4,
+      "REGALO_SORPRESA": 4
+    },
+    "5": {
+      "DESCUENTO_30": 0,
+      "DESCUENTO_20": 2,
+      "DESCUENTO_10": 4,
+      "HELADO_SOFT": 6,
+      "PAPAS_FRITAS": 4,
+      "SCHOP_BEBIDA": 4,
+      "REGALO_SORPRESA": 4
+    }
+  },
+  "blockDelivered": {
+    "1": {
+      "DESCUENTO_30": 0,
+      "DESCUENTO_20": 0,
+      "DESCUENTO_10": 0,
+      "HELADO_SOFT": 0,
+      "PAPAS_FRITAS": 0,
+      "SCHOP_BEBIDA": 0,
+      "REGALO_SORPRESA": 0
+    },
+    "2": {
+      "DESCUENTO_30": 0,
+      "DESCUENTO_20": 0,
+      "DESCUENTO_10": 0,
+      "HELADO_SOFT": 0,
+      "PAPAS_FRITAS": 0,
+      "SCHOP_BEBIDA": 0,
+      "REGALO_SORPRESA": 0
+    },
+    "3": {
+      "DESCUENTO_30": 0,
+      "DESCUENTO_20": 0,
+      "DESCUENTO_10": 0,
+      "HELADO_SOFT": 0,
+      "PAPAS_FRITAS": 0,
+      "SCHOP_BEBIDA": 0,
+      "REGALO_SORPRESA": 0
+    },
+    "4": {
+      "DESCUENTO_30": 0,
+      "DESCUENTO_20": 0,
+      "DESCUENTO_10": 0,
+      "HELADO_SOFT": 0,
+      "PAPAS_FRITAS": 0,
+      "SCHOP_BEBIDA": 0,
+      "REGALO_SORPRESA": 0
+    },
+    "5": {
+      "DESCUENTO_30": 0,
+      "DESCUENTO_20": 0,
+      "DESCUENTO_10": 0,
+      "HELADO_SOFT": 0,
+      "PAPAS_FRITAS": 0,
+      "SCHOP_BEBIDA": 0,
+      "REGALO_SORPRESA": 0
+    }
+  },
+  "deliveredList": []
+}

@@ -79,7 +79,7 @@ export default function MemoryGame({ onStop }) {
   const [flippedIndices, setFlippedIndices] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState([]);
   const [gameStarted, setGameStarted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(45);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [isProcessing, setIsProcessing] = useState(false);
   const [shakeIndices, setShakeIndices] = useState([]);
   const [glowIndices, setGlowIndices] = useState([]);

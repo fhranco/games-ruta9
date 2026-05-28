@@ -16,16 +16,44 @@ export default function RouletteWheel({ onFinished }) {
     setTickTrigger(0);
     sounds.init();
 
-    const { prize, index } = selectWeightedPrize();
-    const targetRotation = calculateRotation(index);
+    let resultIndex = 1; // Default: Sigue Jugando
+    let resultPrize = { id: "SIGUE_PARTICIPANDO", label: "SIGUE JUGANDO", couponCode: "" };
+
+    try {
+      const apiHost = window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
+      const response = await fetch(`${apiHost}/api/spin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName: 'Invitado', receipt: '0000' })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        resultIndex = data.index;
+        resultPrize = {
+          id: data.premio,
+          label: data.label,
+          couponCode: data.couponCode
+        };
+      } else {
+        throw new Error('Error en API');
+      }
+    } catch (err) {
+      console.warn('⚠️ Contingencia Offline: Usando giro local de pérdida.', err.message);
+      const losingIndices = [1, 3, 5];
+      resultIndex = losingIndices[Math.floor(Math.random() * losingIndices.length)];
+      resultPrize = { id: "SIGUE_PARTICIPANDO", label: "SIGUE JUGANDO", couponCode: "" };
+    }
+
+    const targetRotation = calculateRotation(resultIndex);
     const segmentAngle = 360 / ROULETTE_PRIZES.length;
 
-    sounds.playSpin(3.5);
+    sounds.playSpin(6);
 
     await controls.start({
       rotate: targetRotation,
       transition: {
-        duration: 3.5,
+        duration: 6,
         ease: [0.15, 0, 0.1, 1],
         onUpdate: (latest) => {
           const currentRotation = latest.rotate;
@@ -40,7 +68,7 @@ export default function RouletteWheel({ onFinished }) {
 
     setTimeout(() => {
       sounds.playWin();
-      onFinished(prize);
+      onFinished(resultPrize);
       setIsSpinning(false);
       lastTickAngle.current = 0;
     }, 500);

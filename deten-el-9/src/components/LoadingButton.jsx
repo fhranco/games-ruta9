@@ -9,7 +9,7 @@ export default function LoadingButton({
   className = '', 
   disabled = false 
 }) {
-  const baseStyles = "relative w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest transition-all active:scale-95 disabled:opacity-70 disabled:active:scale-100 overflow-hidden";
+  const baseStyles = "relative w-full py-5 sm:py-6 rounded-2xl font-black text-lg sm:text-xl uppercase tracking-widest transition-all active:scale-95 disabled:opacity-70 disabled:active:scale-100 overflow-hidden";
   
   const variants = {
     red: "bg-r9-red text-white shadow-[0_8px_0_0_#9B141E] hover:bg-[#F52538]",
