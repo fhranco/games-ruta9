@@ -239,16 +239,15 @@ const server = http.createServer((req, res) => {
           console.log(`🛡️ [RULETA] Forzando ganador por regla Anti-Sequía (Tiros perdidos seguidos: ${consecutiveLosses})`);
         }
 
-        // 2. Obtener categorías con stock real (doble chequeo: juego + bloque)
         const possiblePrizes = [];
         const prizeWeights = {
-          "DESCUENTO_10": 40,
-          "DESCUENTO_20": 10,
-          "DESCUENTO_30": 2,
-          "HELADO_SOFT": 30,
+          "HELADO_SOFT": 50,     // ¡El Helado Soft es ahora el premio más fácil y común de ganar!
+          "DESCUENTO_10": 25,
           "PAPAS_FRITAS": 16,
           "SCHOP_BEBIDA": 12,
-          "REGALO_SORPRESA": 12
+          "REGALO_SORPRESA": 12,
+          "DESCUENTO_20": 10,
+          "DESCUENTO_30": 2
         };
 
         for (const prize in ruletaStock) {
