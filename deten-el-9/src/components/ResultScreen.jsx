@@ -93,16 +93,53 @@ export default function ResultScreen({ result, playerData, onReset }) {
           throw new Error('API falló');
         }
       } catch (err) {
-        console.warn("⚠️ Error en reclamo de premio central. Usando contingencia offline (Pérdida).", err.message);
-        const forcedLose = {
-          score: 10,
-          message: "¡Sigue participando!",
-          prize: "Vuelve mañana por otro intento",
-          level: "try-again",
-          couponCode: ""
-        };
-        setOutcome(forcedLose);
-        sounds.playGameResult("try-again");
+        console.warn("⚠️ Error en reclamo de premio central. Usando contingencia offline con premios reales.", err.message);
+        
+        const possibleOfflinePrizes = [
+          { id: "HELADO_SOFT", label: "HELADO SOFT GRATIS", weight: 40 },
+          { id: "DESCUENTO_10", label: "10% DE DESCUENTO", weight: 25 },
+          { id: "PAPAS_FRITAS", label: "PAPAS FRITAS GRATIS", weight: 15 },
+          { id: "SCHOP_BEBIDA", label: "BEBIDA O SCHOP GRATIS", weight: 10 },
+          { id: "REGALO_SORPRESA", label: "REGALO SORPRESA R9", weight: 8 },
+          { id: "DESCUENTO_20", label: "20% DE DESCUENTO", weight: 2 }
+        ];
+        
+        const totalWeight = possibleOfflinePrizes.reduce((sum, p) => sum + p.weight, 0);
+        let r = Math.random() * totalWeight;
+        let selectedPrize = possibleOfflinePrizes[0];
+        for (const item of possibleOfflinePrizes) {
+          r -= item.weight;
+          if (r <= 0) {
+            selectedPrize = item;
+            break;
+          }
+        }
+        
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, "0");
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const coupon = `R9-DETENEL9-${day}${month}-${randomStr}`;
+        
+        setOutcome({
+          score: localRes.score,
+          message: "¡HAS GANADO!",
+          prize: selectedPrize.label,
+          couponCode: coupon,
+          level: localRes.level
+        });
+        sounds.playGameResult(localRes.level);
+        
+        storage.savePlay({
+          id: Math.random().toString(36).substr(2, 9),
+          playerName: playerData.name || "Invitado",
+          receipt: playerData.receipt || "0000",
+          stoppedTime: result,
+          score: localRes.score,
+          message: "¡HAS GANADO!",
+          prize: selectedPrize.label,
+          couponCode: coupon
+        });
       }
     };
 

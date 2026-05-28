@@ -23,8 +23,8 @@ export default function StopwatchGame({ onFinished }) {
           setCanWin(false);
         }
       } catch (err) {
-        console.warn('⚠️ Offline o error de conexión al servidor de stock. canWin desactivado por seguridad.', err.message);
-        setCanWin(false);
+        console.warn('⚠️ Offline o error de conexión al servidor de stock. Usando contingencia offline activa (canWin = true).', err.message);
+        setCanWin(true);
       }
     };
     checkStock();

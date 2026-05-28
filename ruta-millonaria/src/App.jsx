@@ -99,10 +99,41 @@ function App() {
         throw new Error('API falló');
       }
     } catch (err) {
-      console.warn("⚠️ Error en reclamo de premio central. Usando contingencia offline (Pérdida).", err.message);
-      const forcedLose = calculateTriviaResult(0);
-      setResult({ ...forcedLose, correctAnswers: finalCorrect, coupon: "" });
-      sounds.playLose();
+      console.warn("⚠️ Error en reclamo de premio central. Usando contingencia offline con premios reales.", err.message);
+      const possibleOfflinePrizes = [
+        { id: "HELADO_SOFT", label: "HELADO SOFT GRATIS", weight: 40 },
+        { id: "DESCUENTO_10", label: "10% DE DESCUENTO", weight: 25 },
+        { id: "PAPAS_FRITAS", label: "PAPAS FRITAS GRATIS", weight: 15 },
+        { id: "SCHOP_BEBIDA", label: "BEBIDA O SCHOP GRATIS", weight: 10 },
+        { id: "REGALO_SORPRESA", label: "REGALO SORPRESA R9", weight: 8 },
+        { id: "DESCUENTO_20", label: "20% DE DESCUENTO", weight: 2 }
+      ];
+      
+      const totalWeight = possibleOfflinePrizes.reduce((sum, p) => sum + p.weight, 0);
+      let r = Math.random() * totalWeight;
+      let selectedPrize = possibleOfflinePrizes[0];
+      for (const item of possibleOfflinePrizes) {
+        r -= item.weight;
+        if (r <= 0) {
+          selectedPrize = item;
+          break;
+        }
+      }
+      
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, "0");
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const coupon = `R9-MILLONARIA-${day}${month}-${randomStr}`;
+      
+      setResult({
+        ...gameResult,
+        correctAnswers: finalCorrect,
+        prize: selectedPrize.label,
+        coupon: coupon,
+        condition: "🍔 ¡FELIZ DÍA DE LA HAMBURGUESA! • PRESENTA EN CAJA 🍔"
+      });
+      sounds.playWin();
     }
 
     setGameState('result');

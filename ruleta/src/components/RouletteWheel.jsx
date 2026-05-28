@@ -39,10 +39,44 @@ export default function RouletteWheel({ onFinished }) {
         throw new Error('Error en API');
       }
     } catch (err) {
-      console.warn('⚠️ Contingencia Offline: Usando giro local de pérdida.', err.message);
-      const losingIndices = [1, 3, 5];
-      resultIndex = losingIndices[Math.floor(Math.random() * losingIndices.length)];
-      resultPrize = { id: "SIGUE_PARTICIPANDO", label: "SIGUE JUGANDO", couponCode: "" };
+      console.warn('⚠️ Contingencia Offline: Usando giro local con premios reales.', err.message);
+      const isWinner = Math.random() < 0.35;
+      if (isWinner) {
+        const list = [
+          { id: "HELADO_SOFT", weight: 50, label: "HELADO SOFT GRATIS", index: 2 },
+          { id: "DESCUENTO_10", weight: 25, label: "10% DE DESCUENTO", index: 0 },
+          { id: "PAPAS_FRITAS", weight: 16, label: "PAPAS FRITAS GRATIS", index: 4 },
+          { id: "SCHOP_BEBIDA", weight: 12, label: "BEBIDA O SCHOP GRATIS", index: 6 },
+          { id: "REGALO_SORPRESA", weight: 12, label: "REGALO SORPRESA R9", index: 7 },
+          { id: "DESCUENTO_20", weight: 10, label: "20% DE DESCUENTO", index: 0 },
+          { id: "DESCUENTO_30", weight: 2, label: "30% DE DESCUENTO", index: 0 }
+        ];
+        const totalWeight = list.reduce((sum, p) => sum + p.weight, 0);
+        let r = Math.random() * totalWeight;
+        let selected = list[0];
+        for (const item of list) {
+          r -= item.weight;
+          if (r <= 0) {
+            selected = item;
+            break;
+          }
+        }
+        resultIndex = selected.index;
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, "0");
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const coupon = `R9-RULETA-${day}${month}-${randomStr}`;
+        resultPrize = {
+          id: selected.id,
+          label: selected.label,
+          couponCode: coupon
+        };
+      } else {
+        const losingIndices = [1, 3, 5];
+        resultIndex = losingIndices[Math.floor(Math.random() * losingIndices.length)];
+        resultPrize = { id: "SIGUE_PARTICIPANDO", label: "SIGUE JUGANDO", couponCode: "" };
+      }
     }
 
     const targetRotation = calculateRotation(resultIndex);
