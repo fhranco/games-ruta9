@@ -223,9 +223,11 @@ const server = http.createServer((req, res) => {
         // 1. Decidir si es un giro ganador basado en reglas orgánicas controladas
         const ahora = new Date();
         const hora = ahora.getHours();
+        const minutos = ahora.getMinutes();
         
-        // Ventana Peak: 16:00 - 19:00 (horas 16, 17, 18)
-        const esPeak = (hora >= 16 && hora < 19);
+        // Ventana Peak: 16:30 - 20:30 (en minutos: 990 a 1230)
+        const minutosTotales = hora * 60 + minutos;
+        const esPeak = (minutosTotales >= 990 && minutosTotales < 1230);
         const winRate = esPeak ? 0.35 : 0.25; // 35% en peak para subir la emoción, 25% estándar
         const maxConsecutiveLossesAllowed = esPeak ? 3 : 5; // Máximo 3 pérdidas en hora peak, 5 en estándar
 
