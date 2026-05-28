@@ -102,17 +102,17 @@ export default function ResultScreen({ result, playerData, onReset }) {
             const initialDb = {
               gameStock: {
                 ruleta: { DESCUENTO_30: 1, DESCUENTO_20: 5, DESCUENTO_10: 20, HELADO_SOFT: 50, PAPAS_FRITAS: 8, SCHOP_BEBIDA: 6, REGALO_SORPRESA: 6 },
-                "deten-el-9": { DESCUENTO_30: 1, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
-                "ruta-millonaria": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 5, REGALO_SORPRESA: 4 },
-                "calza-burger": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 5 },
-                "memoria-burger": { DESCUENTO_30: 0, DESCUENTO_20: 1, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 5, REGALO_SORPRESA: 5 }
+                "deten-el-9": { DESCUENTO_30: 20, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+                "ruta-millonaria": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+                "calza-burger": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 0, HELADO_SOFT: 13, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 5 },
+                "memoria-burger": { DESCUENTO_30: 0, DESCUENTO_20: 1, DESCUENTO_10: 0, HELADO_SOFT: 13, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 5, REGALO_SORPRESA: 5 }
               },
               blockRelease: {
-                "1": { DESCUENTO_30: 1, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
-                "2": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
-                "3": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
-                "4": { DESCUENTO_30: 1, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
-                "5": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 }
+                "1": { DESCUENTO_30: 1, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 16, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+                "2": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 16, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+                "3": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 16, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+                "4": { DESCUENTO_30: 1, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 16, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+                "5": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 16, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 }
               },
               blockDelivered: {
                 "1": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
@@ -169,11 +169,9 @@ export default function ResultScreen({ result, playerData, onReset }) {
         const gameStock = localDb.gameStock["deten-el-9"];
 
         // Dependiendo del resultado de precisión, se eligen mejores premios
-        let allowedPrizes = ["HELADO_SOFT", "DESCUENTO_10"];
+        let allowedPrizes = [];
         if (localRes.level === "perfect") {
-          allowedPrizes = ["DESCUENTO_30", "REGALO_SORPRESA", "DESCUENTO_20"];
-        } else if (localRes.level === "excellent") {
-          allowedPrizes = ["PAPAS_FRITAS", "SCHOP_BEBIDA", "DESCUENTO_10"];
+          allowedPrizes = ["DESCUENTO_30"];
         }
 
         // Filtrar por stock
@@ -181,31 +179,34 @@ export default function ResultScreen({ result, playerData, onReset }) {
           return gameStock[prize] > 0 && localBlockStock[prize] > 0;
         });
 
-        let selectedPrizeId = "DESCUENTO_10"; // Consolación por defecto
-        if (possiblePrizes.length > 0) {
-          selectedPrizeId = possiblePrizes[Math.floor(Math.random() * possiblePrizes.length)];
-          
-          // Descontar stock
-          localDb.gameStock["deten-el-9"][selectedPrizeId]--;
-          localDb.blockDelivered[localBlock.toString()][selectedPrizeId]++;
-          localStorage.setItem('r9_totem_stock', JSON.stringify(localDb));
+        if (possiblePrizes.length === 0) {
+          const forcedLose = {
+            score: 10,
+            message: "¡Sigue participando!",
+            prize: "Vuelve mañana por otro intento",
+            level: "try-again",
+            couponCode: ""
+          };
+          setOutcome(forcedLose);
+          sounds.playGameResult("try-again");
+          return;
         }
 
+        const selectedPrizeId = "DESCUENTO_30";
+        // Descontar stock
+        localDb.gameStock["deten-el-9"][selectedPrizeId]--;
+        localDb.blockDelivered[localBlock.toString()][selectedPrizeId]++;
+        localStorage.setItem('r9_totem_stock', JSON.stringify(localDb));
+
         const PRIZE_LABELS = {
-          "DESCUENTO_30": "30% DE DESCUENTO",
-          "DESCUENTO_20": "20% DE DESCUENTO",
-          "DESCUENTO_10": "10% DE DESCUENTO",
-          "HELADO_SOFT": "HELADO SOFT GRATIS",
-          "PAPAS_FRITAS": "PAPAS FRITAS GRATIS",
-          "SCHOP_BEBIDA": "BEBIDA O SCHOP GRATIS",
-          "REGALO_SORPRESA": "REGALO SORPRESA R9"
+          "DESCUENTO_30": "30% DE DESCUENTO"
         };
 
         const now = new Date();
         const day = String(now.getDate()).padStart(2, "0");
         const month = String(now.getMonth() + 1).padStart(2, "0");
         const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-        const coupon = `R9-DETENEL9-${day}${month}-${randomStr}`;
+        const coupon = `R9-GANASTE-30DESCUENTO-${day}${month}-${randomStr}`;
         
         setOutcome({
           score: localRes.score,

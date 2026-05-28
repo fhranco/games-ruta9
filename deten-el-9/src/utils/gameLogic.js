@@ -2,33 +2,14 @@
  * Calcula el resultado basado en la precisión del usuario respecto a los 9.00 segundos.
  */
 export function calculateResult(stoppedTime) {
-  const target = 9.00;
-  const diff = Math.abs(stoppedTime - target);
+  const isExact = (stoppedTime.toFixed(2) === "9.00");
 
-  if (diff <= 0.05) {
+  if (isExact) {
     return {
       score: 100,
-      message: "Punto perfecto Ruta9",
-      prize: "Premio mayor R9",
+      message: "¡HAS GANADO!",
+      prize: "30% DE DESCUENTO",
       level: "perfect"
-    };
-  }
-
-  if (diff <= 0.15) {
-    return {
-      score: 98,
-      message: "Brutal, casi perfecto",
-      prize: "Excelente precisión R9",
-      level: "excellent"
-    };
-  }
-
-  if (diff <= 0.35) {
-    return {
-      score: 90,
-      message: "Muy cerca",
-      prize: "Gran intento R9",
-      level: "great"
     };
   }
 
