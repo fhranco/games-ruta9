@@ -313,6 +313,8 @@ module.exports = async (req, res) => {
       const losingIndices = [1, 3, 5];
       const selectedIndex = losingIndices[Math.floor(Math.random() * losingIndices.length)];
 
+      console.log(`❌ [RULETA - PERDEDOR] Jugador: ${playerName} | Boleta: ${receipt} | Resultado: SIGUE PARTICIPANDO`);
+
       res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         status: "PERDEDOR",
@@ -373,6 +375,8 @@ module.exports = async (req, res) => {
 
     saveDb();
 
+    console.log(`🎉 [RULETA - GANADOR] Jugador: ${playerName} | Boleta: ${receipt} | Premio: ${selectedPrize} (${PRIZE_LABELS[selectedPrize]}) | Cupón: ${coupon} | Bloque: ${activeBlock}`);
+
     res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: "GANADOR",
@@ -405,6 +409,7 @@ module.exports = async (req, res) => {
     const gameStock = db.gameStock[gameId];
 
     if (!skillSuccessful) {
+      console.log(`❌ [HABILIDAD - FALLIDO] Juego: ${gameId} | Jugador: ${playerName} | Boleta: ${receipt} | Resultado: Habilidad no superada`);
       res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         status: "PERDEDOR",
@@ -423,6 +428,7 @@ module.exports = async (req, res) => {
     }
 
     if (availablePrizes.length === 0) {
+      console.log(`❌ [HABILIDAD - SIN STOCK] Juego: ${gameId} | Jugador: ${playerName} | Boleta: ${receipt} | Resultado: Sin stock disponible`);
       res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         status: "PERDEDOR",
@@ -454,6 +460,8 @@ module.exports = async (req, res) => {
     db.deliveredList.push(playRecord);
 
     saveDb();
+
+    console.log(`🎉 [HABILIDAD - GANADOR] Juego: ${gameId} | Jugador: ${playerName} | Boleta: ${receipt} | Premio: ${selectedPrize} (${PRIZE_LABELS[selectedPrize]}) | Cupón: ${coupon} | Bloque: ${activeBlock}`);
 
     res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
