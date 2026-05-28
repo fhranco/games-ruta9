@@ -8,9 +8,9 @@
  * y evalúa la hora peak oficial de 16:30 a 20:00 hrs.
  */
 
-const fs = require('fs');
-const path = require('path');
-const url = require('url');
+import fs from 'fs';
+import path from 'path';
+import url from 'url';
 
 const DB_FILE = path.join(process.cwd(), 'stock_db.json');
 
@@ -164,7 +164,7 @@ const CORS_HEADERS = {
 };
 
 // Vercel Serverless Function entrypoint
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // CORS preflight
   if (req.method === 'OPTIONS') {
     res.writeHead(204, CORS_HEADERS);
