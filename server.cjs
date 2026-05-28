@@ -39,6 +39,7 @@ const TIME_BLOCKS = [
 
 // Cargar Base de Datos
 let db = null;
+let consecutiveLosses = 0;
 function loadDb() {
   try {
     if (fs.existsSync(DB_FILE)) {
@@ -219,8 +220,22 @@ const server = http.createServer((req, res) => {
         const blockAvailable = getAvailableStockForBlock(activeBlock);
         const ruletaStock = db.gameStock.ruleta;
 
-        // 1. Decidir si es un giro ganador basado en Win Rate global del 25%
-        const isWinner = Math.random() < 0.25;
+        // 1. Decidir si es un giro ganador basado en reglas orgánicas controladas
+        const ahora = new Date();
+        const hora = ahora.getHours();
+        
+        // Ventana Peak: 16:00 - 19:00 (horas 16, 17, 18)
+        const esPeak = (hora >= 16 && hora < 19);
+        const winRate = esPeak ? 0.35 : 0.25; // 35% en peak para subir la emoción, 25% estándar
+        const maxConsecutiveLossesAllowed = esPeak ? 3 : 5; // Máximo 3 pérdidas en hora peak, 5 en estándar
+
+        let isWinner = Math.random() < winRate;
+
+        // Regla Anti-Sequía: si han perdido demasiados seguidos, el siguiente gana sí o sí
+        if (consecutiveLosses >= maxConsecutiveLossesAllowed) {
+          isWinner = true;
+          console.log(`🛡️ [RULETA] Forzando ganador por regla Anti-Sequía (Tiros perdidos seguidos: ${consecutiveLosses})`);
+        }
 
         // 2. Obtener categorías con stock real (doble chequeo: juego + bloque)
         const possiblePrizes = [];
@@ -245,6 +260,11 @@ const server = http.createServer((req, res) => {
 
         // Si decide perder, o no hay premios físicos disponibles en el bloque/ruleta, forzar "Sigue Jugando"
         if (!isWinner || possiblePrizes.length === 0) {
+          // Si el jugador realmente perdió por azar (y no por falta absoluta de stock), aumentamos pérdidas
+          if (possiblePrizes.length > 0) {
+            consecutiveLosses++;
+          }
+          
           // Índices de pérdida de la ruleta en el frontend (1, 3, 5 son "SIGUE JUGANDO")
           const losingIndices = [1, 3, 5];
           const selectedIndex = losingIndices[Math.floor(Math.random() * losingIndices.length)];
@@ -287,6 +307,9 @@ const server = http.createServer((req, res) => {
         } else if (selectedPrize === "REGALO_SORPRESA") {
           targetIndex = 7;
         }
+
+        // Resetear contador de pérdidas consecutivas al entregar un premio
+        consecutiveLosses = 0;
 
         // 4. Descontar stock atómicamente
         db.gameStock.ruleta[selectedPrize]--;
