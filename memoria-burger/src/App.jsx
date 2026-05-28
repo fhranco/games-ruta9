@@ -73,6 +73,7 @@ function App() {
             ...gameResult,
             prize: data.label,
             coupon: data.couponCode,
+            condition: "🍔 ¡FELIZ DÍA DE LA HAMBURGUESA! • PRESENTA EN CAJA 🍔",
             matchedPairsCount
           });
         } else {

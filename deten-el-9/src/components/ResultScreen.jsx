@@ -134,7 +134,8 @@ export default function ResultScreen({ result, playerData, onReset }) {
                 {outcome.couponCode ? (
                   <div className="mt-6 pt-4 border-t border-white/10">
                     <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] mb-1.5 font-bold">CÓDIGO DE VALIDACIÓN</p>
-                    <p className="text-2xl font-mono font-black text-[#FFB800] tracking-widest select-all">{outcome.couponCode}</p>
+                    <p className="text-2xl font-mono font-black text-[#FFB800] tracking-widest select-all mb-3">{outcome.couponCode}</p>
+                    <p className="text-white/60 text-[9px] font-black uppercase tracking-widest leading-none">🍔 ¡Feliz Día de la Hamburguesa! 🍔</p>
                   </div>
                 ) : (
                   <p className="text-sm font-light text-white/40 uppercase tracking-widest mt-1">Intenta nuevamente</p>

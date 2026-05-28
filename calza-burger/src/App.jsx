@@ -74,7 +74,8 @@ function App() {
           setResult({
             ...gameResult,
             prize: data.label,
-            coupon: data.couponCode
+            coupon: data.couponCode,
+            condition: "🍔 ¡FELIZ DÍA DE LA HAMBURGUESA! • PRESENTA EN CAJA 🍔"
           });
         } else {
           // Forzar pérdida si no queda stock

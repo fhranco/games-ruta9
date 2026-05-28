@@ -117,7 +117,8 @@ function App() {
                   <div className="mt-4 pt-3 border-t border-white/10">
                     <p className="text-[9px] text-white/30 uppercase tracking-widest mb-1">CÓDIGO DE CUPÓN</p>
                     <p className="text-lg font-mono font-black text-r9-gold tracking-wider select-all">{lastPrize.couponCode}</p>
-                    <p className="text-white/40 text-[10px] italic mt-2.5">Muestra esta pantalla al personal</p>
+                    <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mt-2.5">🍔 ¡Feliz Día de la Hamburguesa! 🍔</p>
+                    <p className="text-white/30 text-[9px] mt-1 italic">Muestra esta pantalla en caja para validar</p>
                   </div>
                 ) : (
                   <div className="mt-4 pt-3 border-t border-white/10">

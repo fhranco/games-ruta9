@@ -85,7 +85,8 @@ function App() {
             ...gameResult,
             correctAnswers: finalCorrect,
             prize: data.label,
-            coupon: data.couponCode
+            coupon: data.couponCode,
+            condition: "🍔 ¡FELIZ DÍA DE LA HAMBURGUESA! • PRESENTA EN CAJA 🍔"
           });
           sounds.playWin();
         } else {
