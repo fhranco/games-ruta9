@@ -449,6 +449,140 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // ====================================================
+  // API ENDPOINT: GET /admin/logs (PANEL DE AUDITORÍA)
+  // ====================================================
+  if (req.method === 'GET' && pathName === '/admin/logs') {
+    let tableRows = '';
+    const reversedList = [...db.deliveredList].reverse(); // Últimos primeros
+    reversedList.forEach(log => {
+      const date = new Date(log.timestamp).toLocaleString('es-CL');
+      tableRows += `
+        <tr class="border-b border-slate-800 hover:bg-slate-900/40 transition-colors">
+          <td class="px-6 py-4 font-mono text-xs text-slate-500">${log.id}</td>
+          <td class="px-6 py-4 font-semibold text-slate-355">${date}</td>
+          <td class="px-6 py-4">
+            <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-950 border border-slate-800 text-[#FFB800]">${log.game.toUpperCase()}</span>
+          </td>
+          <td class="px-6 py-4 font-medium text-white">${log.playerName}</td>
+          <td class="px-6 py-4 font-mono text-xs text-slate-400">${log.receipt}</td>
+          <td class="px-6 py-4">
+            <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-950 border border-slate-800 text-glow-red text-white">${PRIZE_LABELS[log.prize] || log.prize}</span>
+          </td>
+          <td class="px-6 py-4 font-mono text-sm font-black text-[#FFB800] select-all">${log.couponCode}</td>
+          <td class="px-6 py-4 font-black text-xs text-slate-500 text-center">B${log.block}</td>
+        </tr>
+      `;
+    });
+
+    const summaryCounts = {};
+    db.deliveredList.forEach(log => {
+      summaryCounts[log.game] = (summaryCounts[log.game] || 0) + 1;
+    });
+
+    const totalDelivered = db.deliveredCount || db.deliveredList.length;
+
+    const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ruta 9 — Panel de Auditoría de Premios</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .text-glow-red {
+      text-shadow: 0 0 10px rgba(197, 32, 38, 0.4);
+    }
+    .text-glow-gold {
+      text-shadow: 0 0 10px rgba(255, 184, 0, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen p-6 md:p-12 relative overflow-x-hidden selection:bg-amber-500 selection:text-black">
+  <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-[#C52026]/5 blur-[120px] pointer-events-none"></div>
+  <div class="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-[#FFB800]/5 blur-[120px] pointer-events-none"></div>
+
+  <div class="max-w-7xl mx-auto space-y-12">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-900 pb-8">
+      <div>
+        <h1 class="text-4xl font-black italic tracking-tighter flex items-center gap-2">
+          <span>RUTA</span><span class="text-[#C52026]">9</span>
+          <span class="font-light opacity-50 uppercase tracking-widest text-xs border-l border-white/20 pl-4 ml-2">PREMIUM LOGS</span>
+        </h1>
+        <p class="text-slate-500 text-sm mt-1.5 font-medium">Registro de auditoría transaccional de tótems en tiempo real.</p>
+      </div>
+      
+      <div class="flex items-center gap-4 bg-slate-900/60 border border-slate-800 rounded-2xl px-6 py-3.5 shadow-xl backdrop-blur-md">
+        <div class="text-right">
+          <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">TOTAL ENTREGADOS</p>
+          <p class="text-3xl font-black text-[#FFB800] text-glow-gold mt-1 leading-none">${totalDelivered}</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Resumen por Juego -->
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      \${["ruleta", "deten-el-9", "punto-perfecto", "calza-burger", "memoria-burger"].map(game => \`
+        <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 shadow-lg backdrop-blur-sm flex flex-col justify-between">
+          <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">\${game.toUpperCase()}</span>
+          <span class="text-3xl font-black text-white mt-3 leading-none">\${summaryCounts[game] || 0}</span>
+        </div>
+      \`).join('')}
+    </section>
+
+    <!-- Tabla de Giros -->
+    <section class="bg-slate-900/20 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-md">
+      <div class="px-6 py-5 border-b border-slate-850 bg-slate-950/40 flex justify-between items-center">
+        <h2 class="text-lg font-black tracking-tight flex items-center gap-2">
+          <span>🧾</span> HISTORIAL DE GIROS Y GANADORES
+        </h2>
+        <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider bg-slate-950 border border-slate-800 px-3 py-1 rounded-full">Últimos primeros</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 bg-slate-950/20 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              <th class="px-6 py-4">ID Transacción</th>
+              <th class="px-6 py-4">Fecha / Hora</th>
+              <th class="px-6 py-4">Tótem</th>
+              <th class="px-6 py-4">Jugador</th>
+              <th class="px-6 py-4">Boleta</th>
+              <th class="px-6 py-4">Premio Otorgado</th>
+              <th class="px-6 py-4">Código de Voucher</th>
+              <th class="px-6 py-4 text-center">Bloque</th>
+            </tr>
+          </thead>
+          <tbody>
+            \${tableRows || \`
+              <tr>
+                <td colspan="8" class="text-center py-16 text-slate-600 font-semibold uppercase tracking-widest text-sm">
+                  📭 Sin giros registrados en este local aún.
+                </td>
+              </tr>
+            \`}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
+    `;
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(html);
+    return;
+  }
+
   // 404 para cualquier otra ruta
   res.writeHead(404, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ ok: false, error: 'Ruta no encontrada' }));
