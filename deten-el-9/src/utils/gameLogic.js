@@ -5,29 +5,29 @@ export function calculateResult(stoppedTime) {
   const target = 9.00;
   const diff = Math.abs(stoppedTime - target);
 
-  if (diff <= 0.01) {
+  if (diff <= 0.05) {
     return {
       score: 100,
       message: "Punto perfecto Ruta9",
-      prize: "Participas por Promo Burger + Bebida para 2 personas",
+      prize: "Premio mayor R9",
       level: "perfect"
     };
   }
 
-  if (diff <= 0.02) {
+  if (diff <= 0.15) {
     return {
       score: 98,
       message: "Brutal, casi perfecto",
-      prize: "2 Cupones para sorteo",
+      prize: "Excelente precisión R9",
       level: "excellent"
     };
   }
 
-  if (diff <= 0.05) {
+  if (diff <= 0.35) {
     return {
       score: 90,
       message: "Muy cerca",
-      prize: "1 Cupón para sorteo",
+      prize: "Gran intento R9",
       level: "great"
     };
   }

@@ -14,7 +14,7 @@ export default function StopwatchGame({ onFinished }) {
   useEffect(() => {
     const checkStock = async () => {
       try {
-        const apiHost = window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
+        const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : '';
         const response = await fetch(`${apiHost}/api/can-win?gameId=deten-el-9`);
         if (response.ok) {
           const data = await response.json();

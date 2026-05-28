@@ -74,7 +74,8 @@ function getActiveBlock(testBlockOverride = null) {
   }
 
   const now = new Date();
-  const currentHour = now.getHours();
+  const chileTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Santiago"}));
+  const currentHour = chileTime.getHours();
 
   if (currentHour < 12) return 1; // Antes de la apertura, forzar bloque 1
   if (currentHour >= 22) return 5; // Después del cierre, forzar bloque 5
@@ -222,12 +223,13 @@ const server = http.createServer((req, res) => {
 
         // 1. Decidir si es un giro ganador basado en reglas orgánicas controladas
         const ahora = new Date();
-        const hora = ahora.getHours();
-        const minutos = ahora.getMinutes();
+        const chileTime = new Date(ahora.toLocaleString("en-US", {timeZone: "America/Santiago"}));
+        const hora = chileTime.getHours();
+        const minutos = chileTime.getMinutes();
         
-        // Ventana Peak: 16:30 - 20:30 (en minutos: 990 a 1230)
+        // Ventana Peak: 16:30 - 20:00 (en minutos: 990 a 1200)
         const minutosTotales = hora * 60 + minutos;
-        const esPeak = (minutosTotales >= 990 && minutosTotales < 1230);
+        const esPeak = (minutosTotales >= 990 && minutosTotales < 1200);
         const winRate = esPeak ? 0.35 : 0.25; // 35% en peak para subir la emoción, 25% estándar
         const maxConsecutiveLossesAllowed = esPeak ? 3 : 5; // Máximo 3 pérdidas en hora peak, 5 en estándar
 

@@ -42,7 +42,7 @@ export default function ResultScreen({ result, playerData, onReset }) {
       }
 
       try {
-        const apiHost = window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
+        const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : '';
         const response = await fetch(`${apiHost}/api/claim-skill-prize`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -93,28 +93,114 @@ export default function ResultScreen({ result, playerData, onReset }) {
           throw new Error('API falló');
         }
       } catch (err) {
-        console.warn("⚠️ Error en reclamo de premio central. Usando contingencia offline con premios reales.", err.message);
+        console.warn("⚠️ Error en reclamo de premio central. Usando base de datos de stock integrada en navegador.", err.message);
         
-        const possibleOfflinePrizes = [
-          { id: "HELADO_SOFT", label: "HELADO SOFT GRATIS", weight: 40 },
-          { id: "DESCUENTO_10", label: "10% DE DESCUENTO", weight: 25 },
-          { id: "PAPAS_FRITAS", label: "PAPAS FRITAS GRATIS", weight: 15 },
-          { id: "SCHOP_BEBIDA", label: "BEBIDA O SCHOP GRATIS", weight: 10 },
-          { id: "REGALO_SORPRESA", label: "REGALO SORPRESA R9", weight: 8 },
-          { id: "DESCUENTO_20", label: "20% DE DESCUENTO", weight: 2 }
-        ];
-        
-        const totalWeight = possibleOfflinePrizes.reduce((sum, p) => sum + p.weight, 0);
-        let r = Math.random() * totalWeight;
-        let selectedPrize = possibleOfflinePrizes[0];
-        for (const item of possibleOfflinePrizes) {
-          r -= item.weight;
-          if (r <= 0) {
-            selectedPrize = item;
-            break;
+        // --- MOTOR DE STOCK CLIENT-SIDE (LOCALSTORAGE COMPARTIDO EN VERCEL) ---
+        const getOrCreateLocalStock = () => {
+          let stock = localStorage.getItem('r9_totem_stock');
+          if (!stock) {
+            const initialDb = {
+              gameStock: {
+                ruleta: { DESCUENTO_30: 1, DESCUENTO_20: 5, DESCUENTO_10: 20, HELADO_SOFT: 50, PAPAS_FRITAS: 8, SCHOP_BEBIDA: 6, REGALO_SORPRESA: 6 },
+                "deten-el-9": { DESCUENTO_30: 1, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+                "ruta-millonaria": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 5, REGALO_SORPRESA: 4 },
+                "calza-burger": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 5 },
+                "memoria-burger": { DESCUENTO_30: 0, DESCUENTO_20: 1, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 5, REGALO_SORPRESA: 5 }
+              },
+              blockRelease: {
+                "1": { DESCUENTO_30: 1, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+                "2": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+                "3": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+                "4": { DESCUENTO_30: 1, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+                "5": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 }
+              },
+              blockDelivered: {
+                "1": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+                "2": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+                "3": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+                "4": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+                "5": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 }
+              }
+            };
+            localStorage.setItem('r9_totem_stock', JSON.stringify(initialDb));
+            return initialDb;
           }
+          return JSON.parse(stock);
+        };
+
+        const getLocalActiveBlock = () => {
+          const now = new Date();
+          const currentHour = now.getHours();
+          if (currentHour < 12) return 1;
+          if (currentHour >= 22) return 5;
+          const blocks = [
+            { id: 1, startHour: 12, endHour: 14 },
+            { id: 2, startHour: 14, endHour: 16 },
+            { id: 3, startHour: 16, endHour: 18 },
+            { id: 4, startHour: 18, endHour: 20 },
+            { id: 5, startHour: 20, endHour: 22 }
+          ];
+          const active = blocks.find(b => currentHour >= b.startHour && currentHour < b.endHour);
+          return active ? active.id : 5;
+        };
+
+        const getLocalAvailableStock = (db, blockNum) => {
+          const available = {
+            DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0
+          };
+          for (let b = 1; b <= blockNum; b++) {
+            const released = db.blockRelease[b.toString()];
+            const delivered = db.blockDelivered[b.toString()];
+            if (released) {
+              for (const category in available) {
+                available[category] += (released[category] || 0) - (delivered[category] || 0);
+              }
+            }
+          }
+          for (const category in available) {
+            available[category] = Math.max(0, available[category]);
+          }
+          return available;
+        };
+
+        const localDb = getOrCreateLocalStock();
+        const localBlock = getLocalActiveBlock();
+        const localBlockStock = getLocalAvailableStock(localDb, localBlock);
+        const gameStock = localDb.gameStock["deten-el-9"];
+
+        // Dependiendo del resultado de precisión, se eligen mejores premios
+        let allowedPrizes = ["HELADO_SOFT", "DESCUENTO_10"];
+        if (localRes.level === "perfect") {
+          allowedPrizes = ["DESCUENTO_30", "REGALO_SORPRESA", "DESCUENTO_20"];
+        } else if (localRes.level === "excellent") {
+          allowedPrizes = ["PAPAS_FRITAS", "SCHOP_BEBIDA", "DESCUENTO_10"];
         }
-        
+
+        // Filtrar por stock
+        const possiblePrizes = allowedPrizes.filter(prize => {
+          return gameStock[prize] > 0 && localBlockStock[prize] > 0;
+        });
+
+        let selectedPrizeId = "DESCUENTO_10"; // Consolación por defecto
+        if (possiblePrizes.length > 0) {
+          selectedPrizeId = possiblePrizes[Math.floor(Math.random() * possiblePrizes.length)];
+          
+          // Descontar stock
+          localDb.gameStock["deten-el-9"][selectedPrizeId]--;
+          localDb.blockDelivered[localBlock.toString()][selectedPrizeId]++;
+          localStorage.setItem('r9_totem_stock', JSON.stringify(localDb));
+        }
+
+        const PRIZE_LABELS = {
+          "DESCUENTO_30": "30% DE DESCUENTO",
+          "DESCUENTO_20": "20% DE DESCUENTO",
+          "DESCUENTO_10": "10% DE DESCUENTO",
+          "HELADO_SOFT": "HELADO SOFT GRATIS",
+          "PAPAS_FRITAS": "PAPAS FRITAS GRATIS",
+          "SCHOP_BEBIDA": "BEBIDA O SCHOP GRATIS",
+          "REGALO_SORPRESA": "REGALO SORPRESA R9"
+        };
+
         const now = new Date();
         const day = String(now.getDate()).padStart(2, "0");
         const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -124,7 +210,7 @@ export default function ResultScreen({ result, playerData, onReset }) {
         setOutcome({
           score: localRes.score,
           message: "¡HAS GANADO!",
-          prize: selectedPrize.label,
+          prize: PRIZE_LABELS[selectedPrizeId],
           couponCode: coupon,
           level: localRes.level
         });
@@ -137,7 +223,7 @@ export default function ResultScreen({ result, playerData, onReset }) {
           stoppedTime: result,
           score: localRes.score,
           message: "¡HAS GANADO!",
-          prize: selectedPrize.label,
+          prize: PRIZE_LABELS[selectedPrizeId],
           couponCode: coupon
         });
       }

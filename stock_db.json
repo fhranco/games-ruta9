@@ -4,31 +4,48 @@
   "gameStock": {
     "ruleta": {
       "DESCUENTO_30": 1,
-      "DESCUENTO_20": 7,
+      "DESCUENTO_20": 5,
       "DESCUENTO_10": 20,
       "HELADO_SOFT": 50,
-      "PAPAS_FRITAS": 13,
-      "SCHOP_BEBIDA": 11,
-      "REGALO_SORPRESA": 10
+      "PAPAS_FRITAS": 8,
+      "SCHOP_BEBIDA": 6,
+      "REGALO_SORPRESA": 6
     },
     "deten-el-9": {
-      "DESCUENTO_30": 1
+      "DESCUENTO_30": 1,
+      "DESCUENTO_20": 0,
+      "DESCUENTO_10": 0,
+      "HELADO_SOFT": 3,
+      "PAPAS_FRITAS": 3,
+      "SCHOP_BEBIDA": 0,
+      "REGALO_SORPRESA": 0
     },
     "ruta-millonaria": {
+      "DESCUENTO_30": 0,
+      "DESCUENTO_20": 2,
+      "DESCUENTO_10": 0,
+      "HELADO_SOFT": 3,
+      "PAPAS_FRITAS": 3,
+      "SCHOP_BEBIDA": 5,
+      "REGALO_SORPRESA": 4
     },
     "calza-burger": {
+      "DESCUENTO_30": 0,
       "DESCUENTO_20": 2,
+      "DESCUENTO_10": 0,
+      "HELADO_SOFT": 3,
+      "PAPAS_FRITAS": 3,
       "SCHOP_BEBIDA": 4,
-      "REGALO_SORPRESA": 5,
-      "HELADO_SOFT": 20,
-      "PAPAS_FRITAS": 3
+      "REGALO_SORPRESA": 5
     },
     "memoria-burger": {
+      "DESCUENTO_30": 0,
       "DESCUENTO_20": 1,
+      "DESCUENTO_10": 0,
+      "HELADO_SOFT": 3,
+      "PAPAS_FRITAS": 3,
       "SCHOP_BEBIDA": 5,
-      "REGALO_SORPRESA": 5,
-      "HELADO_SOFT": 20,
-      "PAPAS_FRITAS": 3
+      "REGALO_SORPRESA": 5
     }
   },
   "blockRelease": {
@@ -36,7 +53,7 @@
       "DESCUENTO_30": 1,
       "DESCUENTO_20": 2,
       "DESCUENTO_10": 4,
-      "HELADO_SOFT": 18,
+      "HELADO_SOFT": 13,
       "PAPAS_FRITAS": 4,
       "SCHOP_BEBIDA": 4,
       "REGALO_SORPRESA": 4
@@ -45,7 +62,7 @@
       "DESCUENTO_30": 0,
       "DESCUENTO_20": 2,
       "DESCUENTO_10": 4,
-      "HELADO_SOFT": 18,
+      "HELADO_SOFT": 13,
       "PAPAS_FRITAS": 4,
       "SCHOP_BEBIDA": 4,
       "REGALO_SORPRESA": 4
@@ -54,7 +71,7 @@
       "DESCUENTO_30": 0,
       "DESCUENTO_20": 2,
       "DESCUENTO_10": 4,
-      "HELADO_SOFT": 18,
+      "HELADO_SOFT": 13,
       "PAPAS_FRITAS": 4,
       "SCHOP_BEBIDA": 4,
       "REGALO_SORPRESA": 4
@@ -63,7 +80,7 @@
       "DESCUENTO_30": 1,
       "DESCUENTO_20": 2,
       "DESCUENTO_10": 4,
-      "HELADO_SOFT": 18,
+      "HELADO_SOFT": 13,
       "PAPAS_FRITAS": 4,
       "SCHOP_BEBIDA": 4,
       "REGALO_SORPRESA": 4
@@ -72,7 +89,7 @@
       "DESCUENTO_30": 0,
       "DESCUENTO_20": 2,
       "DESCUENTO_10": 4,
-      "HELADO_SOFT": 18,
+      "HELADO_SOFT": 13,
       "PAPAS_FRITAS": 4,
       "SCHOP_BEBIDA": 4,
       "REGALO_SORPRESA": 4

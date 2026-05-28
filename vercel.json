@@ -1,6 +1,8 @@
 {
   "version": 2,
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/server.js" },
+    { "source": "/admin/logs", "destination": "/api/server.js" },
     { "source": "/games/calza-burger/assets/(.*)", "destination": "/games/calza-burger/assets/$1" },
     { "source": "/games/deten-el-9/assets/(.*)", "destination": "/games/deten-el-9/assets/$1" },
     { "source": "/games/punto-perfecto/assets/(.*)", "destination": "/games/punto-perfecto/assets/$1" },

@@ -90,17 +90,42 @@ export default function App() {
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
-    const scrollLeft = scrollRef.current.scrollLeft;
-    // Ancho aproximado de la tarjeta + gap (410px + 48px gap = ~458px)
-    const cardWidth = scrollRef.current.clientWidth > 768 ? 458 : 398;
-    const index = Math.round(scrollLeft / cardWidth);
-    setActiveIndex(Math.max(0, Math.min(index, GAMES.length - 1)));
+    const container = scrollRef.current;
+    const containerCenter = container.scrollLeft + container.clientWidth / 2;
+    const cardsWrapper = container.firstElementChild;
+    if (cardsWrapper) {
+      const cards = Array.from(cardsWrapper.children) as HTMLElement[];
+      let closestIndex = 0;
+      let minDistance = Infinity;
+
+      cards.forEach((card, index) => {
+        const cardCenter = card.offsetLeft + card.clientWidth / 2;
+        const distance = Math.abs(containerCenter - cardCenter);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestIndex = index;
+        }
+      });
+
+      setActiveIndex(closestIndex);
+    }
   };
 
   const scrollToGame = (index: number) => {
     if (!scrollRef.current) return;
-    const cardWidth = scrollRef.current.clientWidth > 768 ? 458 : 398;
-    scrollRef.current.scrollTo({ left: index * cardWidth, behavior: "smooth" });
+    const container = scrollRef.current;
+    const cardsWrapper = container.firstElementChild;
+    if (cardsWrapper) {
+      const card = cardsWrapper.children[index] as HTMLElement;
+      if (card) {
+        card.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+        setActiveIndex(index);
+      }
+    }
   };
 
   const handlePrevCard = (e: React.MouseEvent) => {

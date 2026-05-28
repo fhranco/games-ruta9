@@ -20,7 +20,7 @@ export default function RouletteWheel({ onFinished }) {
     let resultPrize = { id: "SIGUE_PARTICIPANDO", label: "SIGUE JUGANDO", couponCode: "" };
 
     try {
-      const apiHost = window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
+      const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : '';
       const response = await fetch(`${apiHost}/api/spin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,43 +39,183 @@ export default function RouletteWheel({ onFinished }) {
         throw new Error('Error en API');
       }
     } catch (err) {
-      console.warn('⚠️ Contingencia Offline: Usando giro local con premios reales.', err.message);
-      const isWinner = Math.random() < 0.35;
-      if (isWinner) {
-        const list = [
-          { id: "HELADO_SOFT", weight: 50, label: "HELADO SOFT GRATIS", index: 2 },
-          { id: "DESCUENTO_10", weight: 25, label: "10% DE DESCUENTO", index: 0 },
-          { id: "PAPAS_FRITAS", weight: 16, label: "PAPAS FRITAS GRATIS", index: 4 },
-          { id: "SCHOP_BEBIDA", weight: 12, label: "BEBIDA O SCHOP GRATIS", index: 6 },
-          { id: "REGALO_SORPRESA", weight: 12, label: "REGALO SORPRESA R9", index: 7 },
-          { id: "DESCUENTO_20", weight: 10, label: "20% DE DESCUENTO", index: 0 },
-          { id: "DESCUENTO_30", weight: 2, label: "30% DE DESCUENTO", index: 0 }
+      console.warn('⚠️ Contingencia Offline: Usando base de datos de stock integrada en navegador.', err.message);
+      
+      // --- MOTOR DE STOCK CLIENT-SIDE (LOCALSTORAGE COMPARTIDO EN VERCEL) ---
+      const getOrCreateLocalStock = () => {
+        let stock = localStorage.getItem('r9_totem_stock');
+        if (!stock) {
+          const initialDb = {
+            gameStock: {
+              ruleta: { DESCUENTO_30: 1, DESCUENTO_20: 5, DESCUENTO_10: 20, HELADO_SOFT: 50, PAPAS_FRITAS: 8, SCHOP_BEBIDA: 6, REGALO_SORPRESA: 6 },
+              "deten-el-9": { DESCUENTO_30: 1, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+              "ruta-millonaria": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 5, REGALO_SORPRESA: 4 },
+              "calza-burger": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 5 },
+              "memoria-burger": { DESCUENTO_30: 0, DESCUENTO_20: 1, DESCUENTO_10: 0, HELADO_SOFT: 3, PAPAS_FRITAS: 3, SCHOP_BEBIDA: 5, REGALO_SORPRESA: 5 }
+            },
+            blockRelease: {
+              "1": { DESCUENTO_30: 1, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+              "2": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+              "3": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+              "4": { DESCUENTO_30: 1, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 },
+              "5": { DESCUENTO_30: 0, DESCUENTO_20: 2, DESCUENTO_10: 4, HELADO_SOFT: 13, PAPAS_FRITAS: 4, SCHOP_BEBIDA: 4, REGALO_SORPRESA: 4 }
+            },
+            blockDelivered: {
+              "1": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+              "2": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+              "3": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+              "4": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 },
+              "5": { DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0 }
+            }
+          };
+          localStorage.setItem('r9_totem_stock', JSON.stringify(initialDb));
+          return initialDb;
+        }
+        return JSON.parse(stock);
+      };
+
+      const getLocalActiveBlock = () => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        if (currentHour < 12) return 1;
+        if (currentHour >= 22) return 5;
+        const blocks = [
+          { id: 1, startHour: 12, endHour: 14 },
+          { id: 2, startHour: 14, endHour: 16 },
+          { id: 3, startHour: 16, endHour: 18 },
+          { id: 4, startHour: 18, endHour: 20 },
+          { id: 5, startHour: 20, endHour: 22 }
         ];
-        const totalWeight = list.reduce((sum, p) => sum + p.weight, 0);
+        const active = blocks.find(b => currentHour >= b.startHour && currentHour < b.endHour);
+        return active ? active.id : 5;
+      };
+
+      const getLocalAvailableStock = (db, blockNum) => {
+        const available = {
+          DESCUENTO_30: 0, DESCUENTO_20: 0, DESCUENTO_10: 0, HELADO_SOFT: 0, PAPAS_FRITAS: 0, SCHOP_BEBIDA: 0, REGALO_SORPRESA: 0
+        };
+        for (let b = 1; b <= blockNum; b++) {
+          const released = db.blockRelease[b.toString()];
+          const delivered = db.blockDelivered[b.toString()];
+          if (released) {
+            for (const category in available) {
+              available[category] += (released[category] || 0) - (delivered[category] || 0);
+            }
+          }
+        }
+        for (const category in available) {
+          available[category] = Math.max(0, available[category]);
+        }
+        return available;
+      };
+
+      const localDb = getOrCreateLocalStock();
+      const localBlock = getLocalActiveBlock();
+      const localBlockStock = getLocalAvailableStock(localDb, localBlock);
+      const localRuletaStock = localDb.gameStock.ruleta;
+
+      const ahora = new Date();
+      const hora = ahora.getHours();
+      const minutos = ahora.getMinutes();
+      const minutosTotales = hora * 60 + minutos;
+      
+      // Ventana Peak: 16:30 - 20:00 (en minutos: 990 a 1200)
+      const esPeak = (minutosTotales >= 990 && minutosTotales < 1200);
+      const winRate = esPeak ? 0.35 : 0.25; // 35% en peak, 25% estándar
+      const maxConsecutiveLossesAllowed = esPeak ? 3 : 5;
+      
+      let consecutiveLosses = parseInt(localStorage.getItem('r9_ruleta_consecutive_losses') || '0', 10);
+      let isWinner = Math.random() < winRate;
+      
+      if (consecutiveLosses >= maxConsecutiveLossesAllowed) {
+        isWinner = true;
+        console.log(`🛡️ [RULETA OFFLINE] Forzando ganador por regla Anti-Sequía (Tiros perdidos seguidos: ${consecutiveLosses})`);
+      }
+
+      // Filtrar qué premios tienen stock real disponible en el bloque y en la ruleta
+      const possiblePrizes = [];
+      const prizeWeights = {
+        HELADO_SOFT: 50,
+        DESCUENTO_10: 25,
+        PAPAS_FRITAS: 16,
+        SCHOP_BEBIDA: 12,
+        REGALO_SORPRESA: 12,
+        DESCUENTO_20: 10,
+        DESCUENTO_30: 2
+      };
+
+      for (const prize in localRuletaStock) {
+        if (localRuletaStock[prize] > 0 && localBlockStock[prize] > 0) {
+          possiblePrizes.push({
+            id: prize,
+            weight: prizeWeights[prize] || 10
+          });
+        }
+      }
+
+      // Si no quedan premios con stock físico, forzar "Sigue Jugando"
+      if (!isWinner || possiblePrizes.length === 0) {
+        if (possiblePrizes.length > 0) {
+          localStorage.setItem('r9_ruleta_consecutive_losses', (consecutiveLosses + 1).toString());
+        }
+        const losingIndices = [1, 3, 5];
+        resultIndex = losingIndices[Math.floor(Math.random() * losingIndices.length)];
+        resultPrize = { id: "SIGUE_PARTICIPANDO", label: "SIGUE JUGANDO", couponCode: "" };
+      } else {
+        // Reset de pérdidas
+        localStorage.setItem('r9_ruleta_consecutive_losses', '0');
+
+        // Selección ponderada de stock
+        const totalWeight = possiblePrizes.reduce((sum, p) => sum + p.weight, 0);
         let r = Math.random() * totalWeight;
-        let selected = list[0];
-        for (const item of list) {
-          r -= item.weight;
+        let selectedPrizeId = possiblePrizes[0].id;
+        for (const p of possiblePrizes) {
+          r -= p.weight;
           if (r <= 0) {
-            selected = item;
+            selectedPrizeId = p.id;
             break;
           }
         }
-        resultIndex = selected.index;
+
+        // Mapear segmentos
+        const PRIZE_LABELS = {
+          "DESCUENTO_30": "30% DE DESCUENTO",
+          "DESCUENTO_20": "20% DE DESCUENTO",
+          "DESCUENTO_10": "10% DE DESCUENTO",
+          "HELADO_SOFT": "HELADO SOFT GRATIS",
+          "PAPAS_FRITAS": "PAPAS FRITAS GRATIS",
+          "SCHOP_BEBIDA": "BEBIDA O SCHOP GRATIS",
+          "REGALO_SORPRESA": "REGALO SORPRESA R9"
+        };
+
+        if (selectedPrizeId.startsWith("DESCUENTO")) {
+          resultIndex = 0;
+        } else if (selectedPrizeId === "HELADO_SOFT") {
+          resultIndex = 2;
+        } else if (selectedPrizeId === "PAPAS_FRITAS") {
+          resultIndex = 4;
+        } else if (selectedPrizeId === "SCHOP_BEBIDA") {
+          resultIndex = 6;
+        } else if (selectedPrizeId === "REGALO_SORPRESA") {
+          resultIndex = 7;
+        }
+
+        // Descontar de localStorage
+        localDb.gameStock.ruleta[selectedPrizeId]--;
+        localDb.blockDelivered[localBlock.toString()][selectedPrizeId]++;
+        localStorage.setItem('r9_totem_stock', JSON.stringify(localDb));
+
         const now = new Date();
         const day = String(now.getDate()).padStart(2, "0");
         const month = String(now.getMonth() + 1).padStart(2, "0");
         const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
         const coupon = `R9-RULETA-${day}${month}-${randomStr}`;
+
         resultPrize = {
-          id: selected.id,
-          label: selected.label,
+          id: selectedPrizeId,
+          label: PRIZE_LABELS[selectedPrizeId],
           couponCode: coupon
         };
-      } else {
-        const losingIndices = [1, 3, 5];
-        resultIndex = losingIndices[Math.floor(Math.random() * losingIndices.length)];
-        resultPrize = { id: "SIGUE_PARTICIPANDO", label: "SIGUE JUGANDO", couponCode: "" };
       }
     }
 
