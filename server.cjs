@@ -167,8 +167,53 @@ const server = http.createServer((req, res) => {
       activeBlock,
       blockAvailable,
       gameStock: db.gameStock,
-      deliveredCount: db.deliveredCount
+      deliveredCount: db.deliveredCount,
+      settings: db.settings
     }));
+    return;
+  }
+
+  // ====================================================
+  // API ENDPOINT: GET /api/config
+  // ====================================================
+  if (req.method === 'GET' && pathName === '/api/config') {
+    res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, settings: db.settings }));
+    return;
+  }
+
+  // ====================================================
+  // API ENDPOINT: POST /api/config
+  // ====================================================
+  if (req.method === 'POST' && pathName === '/api/config') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const data = body ? JSON.parse(body) : {};
+        
+        // Validar y tipar datos recibidos
+        db.settings = {
+          winRateStandard: !isNaN(parseFloat(data.winRateStandard)) ? parseFloat(data.winRateStandard) : 0.25,
+          winRatePeak: !isNaN(parseFloat(data.winRatePeak)) ? parseFloat(data.winRatePeak) : 0.35,
+          peakHourStart: data.peakHourStart || "16:30",
+          peakHourEnd: data.peakHourEnd || "20:30",
+          maxConsecutiveLossesStandard: parseInt(data.maxConsecutiveLossesStandard, 10) || 5,
+          maxConsecutiveLossesPeak: parseInt(data.maxConsecutiveLossesPeak, 10) || 3,
+          attemptsLimitPerReceipt: parseInt(data.attemptsLimitPerReceipt, 10) || 1,
+          roulettePrizeWeights: data.roulettePrizeWeights || {},
+          detenEl9Tolerance: !isNaN(parseFloat(data.detenEl9Tolerance)) ? parseFloat(data.detenEl9Tolerance) : 0.05
+        };
+
+        saveDb();
+        res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, settings: db.settings }));
+      } catch (err) {
+        console.error('❌ Error guardando configuración:', err.message);
+        res.writeHead(500, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'Error interno guardando configuración' }));
+      }
+    });
     return;
   }
 
@@ -221,17 +266,50 @@ const server = http.createServer((req, res) => {
         const blockAvailable = getAvailableStockForBlock(activeBlock);
         const ruletaStock = db.gameStock.ruleta;
 
-        // 1. Decidir si es un giro ganador basado en reglas orgánicas controladas
+        const settings = db.settings || {};
+        
+        // 1. Validar límite de intentos por boleta (evitar abusos)
+        const attemptsLimit = settings.attemptsLimitPerReceipt || 1;
+        const receiptPlayCount = db.deliveredList.filter(log => log.receipt === receipt).length;
+        if (receipt !== '0000' && receiptPlayCount >= attemptsLimit) {
+          console.log(`⚠️ [RULETA - LIMIT] Boleta ${receipt} ya jugó (${receiptPlayCount}/${attemptsLimit}). Forzando perdedor.`);
+          const losingIndices = [1, 3, 5];
+          const selectedIndex = losingIndices[Math.floor(Math.random() * losingIndices.length)];
+          res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            status: "PERDEDOR",
+            premio: "SIGUE_PARTICIPANDO",
+            label: PRIZE_LABELS["SIGUE_PARTICIPANDO"],
+            index: selectedIndex,
+            couponCode: "",
+            error: "Límite de intentos excedido"
+          }));
+          return;
+        }
+
+        // 2. Decidir si es un giro ganador basado en reglas orgánicas controladas
         const ahora = new Date();
         const chileTime = new Date(ahora.toLocaleString("en-US", {timeZone: "America/Santiago"}));
         const hora = chileTime.getHours();
         const minutos = chileTime.getMinutes();
-        
-        // Ventana Peak: 16:30 - 20:00 (en minutos: 990 a 1200)
         const minutosTotales = hora * 60 + minutos;
-        const esPeak = (minutosTotales >= 990 && minutosTotales < 1200);
-        const winRate = esPeak ? 0.35 : 0.25; // 35% en peak para subir la emoción, 25% estándar
-        const maxConsecutiveLossesAllowed = esPeak ? 3 : 5; // Máximo 3 pérdidas en hora peak, 5 en estándar
+        
+        const peakHourStart = settings.peakHourStart || "16:30";
+        const peakHourEnd = settings.peakHourEnd || "20:30";
+        const parseTimeToMinutes = (timeStr) => {
+          const [h, m] = timeStr.split(':').map(Number);
+          return h * 60 + m;
+        };
+        const peakStart = parseTimeToMinutes(peakHourStart);
+        const peakEnd = parseTimeToMinutes(peakHourEnd);
+
+        const esPeak = (minutosTotales >= peakStart && minutosTotales < peakEnd);
+        const winRate = esPeak 
+          ? (settings.winRatePeak !== undefined ? settings.winRatePeak : 0.35) 
+          : (settings.winRateStandard !== undefined ? settings.winRateStandard : 0.25);
+        const maxConsecutiveLossesAllowed = esPeak 
+          ? (settings.maxConsecutiveLossesPeak !== undefined ? settings.maxConsecutiveLossesPeak : 3) 
+          : (settings.maxConsecutiveLossesStandard !== undefined ? settings.maxConsecutiveLossesStandard : 5);
 
         let isWinner = Math.random() < winRate;
 
@@ -242,8 +320,8 @@ const server = http.createServer((req, res) => {
         }
 
         const possiblePrizes = [];
-        const prizeWeights = {
-          "HELADO_SOFT": 50,     // ¡El Helado Soft es ahora el premio más fácil y común de ganar!
+        const prizeWeights = settings.roulettePrizeWeights || {
+          "HELADO_SOFT": 50,
           "DESCUENTO_10": 25,
           "PAPAS_FRITAS": 16,
           "SCHOP_BEBIDA": 12,
@@ -263,12 +341,10 @@ const server = http.createServer((req, res) => {
 
         // Si decide perder, o no hay premios físicos disponibles en el bloque/ruleta, forzar "Sigue Jugando"
         if (!isWinner || possiblePrizes.length === 0) {
-          // Si el jugador realmente perdió por azar (y no por falta absoluta de stock), aumentamos pérdidas
           if (possiblePrizes.length > 0) {
             consecutiveLosses++;
           }
           
-          // Índices de pérdida de la ruleta en el frontend (1, 3, 5 son "SIGUE JUGANDO")
           const losingIndices = [1, 3, 5];
           const selectedIndex = losingIndices[Math.floor(Math.random() * losingIndices.length)];
 
@@ -283,7 +359,7 @@ const server = http.createServer((req, res) => {
           return;
         }
 
-        // 3. Selección probabilística ponderada con redirección de pesos automática
+        // 3. Selección probabilística ponderada
         const totalWeight = possiblePrizes.reduce((sum, p) => sum + p.weight, 0);
         let randomVal = Math.random() * totalWeight;
         let selectedPrize = possiblePrizes[0].id;
@@ -296,8 +372,6 @@ const server = http.createServer((req, res) => {
           }
         }
 
-        // Mapear el premio seleccionado al segmento correspondiente del frontend (8 segmentos)
-        // Segmentos: 0: Desc R9, 1: Sigue, 2: Helado, 3: Sigue, 4: Papas, 5: Sigue, 6: Bebida, 7: Sorpresa
         let targetIndex = 1;
         if (selectedPrize.startsWith("DESCUENTO")) {
           targetIndex = 0;
@@ -311,10 +385,8 @@ const server = http.createServer((req, res) => {
           targetIndex = 7;
         }
 
-        // Resetear contador de pérdidas consecutivas al entregar un premio
         consecutiveLosses = 0;
 
-        // 4. Descontar stock atómicamente
         db.gameStock.ruleta[selectedPrize]--;
         db.blockDelivered[activeBlock.toString()][selectedPrize]++;
         db.deliveredCount++;
@@ -365,7 +437,7 @@ const server = http.createServer((req, res) => {
         const gameId = data.gameId;
         const playerName = data.playerName || 'Invitado';
         const receipt = data.receipt || '0000';
-        const skillSuccessful = !!data.skillSuccessful; // Si realmente logró el objetivo en frontend
+        const skillSuccessful = !!data.skillSuccessful;
 
         if (!gameId || !db.gameStock[gameId]) {
           res.writeHead(400, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
@@ -373,11 +445,28 @@ const server = http.createServer((req, res) => {
           return;
         }
 
+        const settings = db.settings || {};
+        
+        // Validar límite de intentos por boleta (evitar abusos)
+        const attemptsLimit = settings.attemptsLimitPerReceipt || 1;
+        const receiptPlayCount = db.deliveredList.filter(log => log.receipt === receipt).length;
+        if (receipt !== '0000' && receiptPlayCount >= attemptsLimit) {
+          console.log(`⚠️ [HABILIDAD - LIMIT] Boleta ${receipt} ya jugó (${receiptPlayCount}/${attemptsLimit}). Forzando perdedor.`);
+          res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            status: "PERDEDOR",
+            premio: "SIGUE_PARTICIPANDO",
+            label: PRIZE_LABELS["SIGUE_PARTICIPANDO"],
+            couponCode: "",
+            error: "Límite de intentos excedido"
+          }));
+          return;
+        }
+
         const activeBlock = getActiveBlock(testBlock);
         const blockAvailable = getAvailableStockForBlock(activeBlock);
         const gameStock = db.gameStock[gameId];
 
-        // Si el jugador no lo logró en el frontend o no hay stock, forzar "Sigue Participando"
         if (!skillSuccessful) {
           res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
           res.end(JSON.stringify({
@@ -389,7 +478,6 @@ const server = http.createServer((req, res) => {
           return;
         }
 
-        // Buscar qué premios permitidos para este juego tienen stock disponible
         const availablePrizes = [];
         for (const prize in gameStock) {
           if (gameStock[prize] > 0 && blockAvailable[prize] > 0) {
@@ -398,7 +486,6 @@ const server = http.createServer((req, res) => {
         }
 
         if (availablePrizes.length === 0) {
-          // Bloqueo total de premios físicos: stock agotado
           res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
           res.end(JSON.stringify({
             status: "PERDEDOR",
@@ -409,11 +496,8 @@ const server = http.createServer((req, res) => {
           return;
         }
 
-        // Seleccionar un premio disponible. Prioridad por stock o aleatorio
-        // Elegimos de forma aleatoria simple de los que quedan
         const selectedPrize = availablePrizes[Math.floor(Math.random() * availablePrizes.length)];
 
-        // Descontar stock atómicamente
         db.gameStock[gameId][selectedPrize]--;
         db.blockDelivered[activeBlock.toString()][selectedPrize]++;
         db.deliveredCount++;
@@ -523,8 +607,12 @@ const server = http.createServer((req, res) => {
         <p class="text-slate-500 text-sm mt-1.5 font-medium">Registro de auditoría transaccional de tótems en tiempo real.</p>
       </div>
       
-      <div class="flex items-center gap-4 bg-slate-900/60 border border-slate-800 rounded-2xl px-6 py-3.5 shadow-xl backdrop-blur-md">
-        <div class="text-right">
+      <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+        <div class="flex items-center gap-3">
+          <a href="/admin/logs" class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-[#FFB800] border border-[#FFB800] text-black shadow-lg shadow-amber-500/10">📋 HISTORIAL LOGS</a>
+          <a href="/admin/config" class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850 hover:border-slate-700 transition-all">⚙️ CONFIGURACIÓN</a>
+        </div>
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl px-6 py-3.5 shadow-xl backdrop-blur-md text-right">
           <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">TOTAL ENTREGADOS</p>
           <p class="text-3xl font-black text-[#FFB800] text-glow-gold mt-1 leading-none">${totalDelivered}</p>
         </div>
@@ -533,12 +621,12 @@ const server = http.createServer((req, res) => {
 
     <!-- Resumen por Juego -->
     <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
-      \${["ruleta", "deten-el-9", "punto-perfecto", "calza-burger", "memoria-burger"].map(game => \`
+      ${["ruleta", "deten-el-9", "punto-perfecto", "calza-burger", "memoria-burger"].map(game => `
         <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 shadow-lg backdrop-blur-sm flex flex-col justify-between">
-          <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">\${game.toUpperCase()}</span>
-          <span class="text-3xl font-black text-white mt-3 leading-none">\${summaryCounts[game] || 0}</span>
+          <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">${game.toUpperCase()}</span>
+          <span class="text-3xl font-black text-white mt-3 leading-none">${summaryCounts[game] || 0}</span>
         </div>
-      \`).join('')}
+      `).join('')}
     </section>
 
     <!-- Tabla de Giros -->
@@ -565,18 +653,225 @@ const server = http.createServer((req, res) => {
             </tr>
           </thead>
           <tbody>
-            \${tableRows || \`
+            ${tableRows || `
               <tr>
                 <td colspan="8" class="text-center py-16 text-slate-600 font-semibold uppercase tracking-widest text-sm">
                   📭 Sin giros registrados en este local aún.
                 </td>
               </tr>
-            \`}
+            `}
           </tbody>
         </table>
       </div>
     </section>
   </div>
+</body>
+</html>
+    `;
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(html);
+    return;
+  }
+
+  // ====================================================
+  // API ENDPOINT: GET /admin/config (PANEL DE CONFIGURACIÓN)
+  // ====================================================
+  if (req.method === 'GET' && pathName === '/admin/config') {
+    const settings = db.settings || {};
+    const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ruta 9 — Configuración de Parámetros</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen p-6 md:p-12 relative overflow-x-hidden selection:bg-amber-500 selection:text-black">
+  <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-[#C52026]/5 blur-[120px] pointer-events-none"></div>
+  <div class="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-[#FFB800]/5 blur-[120px] pointer-events-none"></div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-6 right-6 z-50 transform translate-x-80 opacity-0 transition-all duration-300 bg-slate-900 border-2 border-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
+    <span class="text-emerald-500 text-xl font-bold">✓</span>
+    <span class="text-sm font-semibold uppercase tracking-wider">¡Configuración guardada!</span>
+  </div>
+
+  <div class="max-w-4xl mx-auto space-y-12">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-900 pb-8">
+      <div>
+        <h1 class="text-4xl font-black italic tracking-tighter flex items-center gap-2">
+          <span>RUTA</span><span class="text-[#C52026]">9</span>
+          <span class="font-light opacity-50 uppercase tracking-widest text-xs border-l border-white/20 pl-4 ml-2">CONFIGURACIÓN</span>
+        </h1>
+        <p class="text-slate-500 text-sm mt-1.5 font-medium">Panel de administración dinámica del motor de juegos.</p>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <a href="/admin/logs" class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850 hover:border-slate-700 transition-all">📋 HISTORIAL LOGS</a>
+        <a href="/admin/config" class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-[#FFB800] border border-[#FFB800] text-black shadow-lg shadow-amber-500/10">⚙️ CONFIGURACIÓN</a>
+      </div>
+    </header>
+
+    <form id="configForm" class="space-y-8">
+      <!-- Sección: Tasas de Entrega -->
+      <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
+        <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
+          <span>🎯</span> Tasas de Entrega de Premios (Win Rates)
+        </h2>
+        <p class="text-slate-500 text-xs font-medium">Controla la probabilidad de que un tiro en la ruleta reciba un premio físico en vez de "Sigue Participando".</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+          <!-- Win Rate Standard -->
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-black uppercase tracking-wider text-slate-400">Probabilidad Estándar</label>
+              <span id="winRateStandardLabel" class="text-sm font-black text-[#FFB800] font-mono">25%</span>
+            </div>
+            <input type="range" name="winRateStandard" min="0" max="1" step="0.05" value="${settings.winRateStandard ?? 0.25}" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#FFB800]" oninput="document.getElementById('winRateStandardLabel').innerText = Math.round(this.value * 100) + '%'">
+          </div>
+
+          <!-- Win Rate Peak -->
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-black uppercase tracking-wider text-slate-400">Probabilidad Hora Peak</label>
+              <span id="winRatePeakLabel" class="text-sm font-black text-[#C52026] font-mono">35%</span>
+            </div>
+            <input type="range" name="winRatePeak" min="0" max="1" step="0.05" value="${settings.winRatePeak ?? 0.35}" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#C52026]" oninput="document.getElementById('winRatePeakLabel').innerText = Math.round(this.value * 100) + '%'">
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Horas Peak y Reintentos -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Rango Horario Peak -->
+        <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-xl backdrop-blur-md">
+          <h2 class="text-lg font-black text-white flex items-center gap-2 uppercase tracking-tight">
+            <span>⏰</span> Ventana Horaria Peak
+          </h2>
+          <p class="text-slate-500 text-xs">Franja horaria diaria en la que se aplica la tasa de entrega peak para aumentar la emoción en horas de alta afluencia.</p>
+          <div class="grid grid-cols-2 gap-4 pt-2">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Hora de Inicio</label>
+              <input type="text" name="peakHourStart" value="${settings.peakHourStart || '16:30'}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Hora de Fin</label>
+              <input type="text" name="peakHourEnd" value="${settings.peakHourEnd || '20:30'}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+            </div>
+          </div>
+        </div>
+
+        <!-- Límites de Intentos y Pérdidas -->
+        <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-xl backdrop-blur-md">
+          <h2 class="text-lg font-black text-white flex items-center gap-2 uppercase tracking-tight">
+            <span>🛡️</span> Reglas de Seguridad
+          </h2>
+          <p class="text-slate-500 text-xs">Control de reintentos por boleta para prevenir abusos de jugadores y reglas de tolerancia.</p>
+          <div class="grid grid-cols-2 gap-4 pt-2">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Intentos por Boleta</label>
+              <input type="number" name="attemptsLimitPerReceipt" min="1" max="10" value="${settings.attemptsLimitPerReceipt || 1}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Tolerancia Detén 9 (s)</label>
+              <input type="number" name="detenEl9Tolerance" min="0.01" max="0.5" step="0.01" value="${settings.detenEl9Tolerance || 0.05}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Pesos de Premios de la Ruleta -->
+      <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
+        <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
+          <span>🎡</span> Ponderaciones de Premios (Ruleta)
+        </h2>
+        <p class="text-slate-500 text-xs">Determina la probabilidad relativa de ganar cada premio en la ruleta cuando sale un tiro ganador. A mayor peso relativo, más frecuente será el premio.</p>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-2">
+          ${Object.keys(PRIZE_LABELS).filter(p => p !== 'SIGUE_PARTICIPANDO').map(prize => {
+            const weights = settings.roulettePrizeWeights || {};
+            const val = weights[prize] !== undefined ? weights[prize] : 10;
+            return `
+              <div class="space-y-2 bg-slate-950/40 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between">
+                <label class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">${PRIZE_LABELS[prize]}</label>
+                <input type="number" name="weight_${prize}" min="0" max="200" value="${val}" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-3 py-2 text-sm font-mono text-center focus:border-[#FFB800] outline-none">
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- Botón de Guardado -->
+      <div class="flex justify-end pt-4">
+        <button type="submit" class="px-8 py-4 bg-[#FFB800] text-black font-black uppercase tracking-wider text-sm rounded-2xl shadow-xl shadow-amber-500/10 active:scale-95 hover:bg-[#FFB800]/90 transition-all cursor-pointer">
+          💾 Guardar Cambios
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Inicializar visualización de Win Rates
+    document.getElementById('winRateStandardLabel').innerText = Math.round(${settings.winRateStandard ?? 0.25} * 100) + '%';
+    document.getElementById('winRatePeakLabel').innerText = Math.round(${settings.winRatePeak ?? 0.35} * 100) + '%';
+
+    document.getElementById('configForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const data = {
+        winRateStandard: parseFloat(formData.get('winRateStandard')),
+        winRatePeak: parseFloat(formData.get('winRatePeak')),
+        peakHourStart: formData.get('peakHourStart'),
+        peakHourEnd: formData.get('peakHourEnd'),
+        maxConsecutiveLossesStandard: 5,
+        maxConsecutiveLossesPeak: 3,
+        attemptsLimitPerReceipt: parseInt(formData.get('attemptsLimitPerReceipt'), 10),
+        detenEl9Tolerance: parseFloat(formData.get('detenEl9Tolerance')),
+        roulettePrizeWeights: {
+          "DESCUENTO_30": parseInt(formData.get('weight_DESCUENTO_30'), 10) || 0,
+          "DESCUENTO_20": parseInt(formData.get('weight_DESCUENTO_20'), 10) || 0,
+          "DESCUENTO_10": parseInt(formData.get('weight_DESCUENTO_10'), 10) || 0,
+          "HELADO_SOFT": parseInt(formData.get('weight_HELADO_SOFT'), 10) || 0,
+          "PAPAS_FRITAS": parseInt(formData.get('weight_PAPAS_FRITAS'), 10) || 0,
+          "SCHOP_BEBIDA": parseInt(formData.get('weight_SCHOP_BEBIDA'), 10) || 0,
+          "REGALO_SORPRESA": parseInt(formData.get('weight_REGALO_SORPRESA'), 10) || 0
+        }
+      };
+
+      try {
+        const response = await fetch('/api/config', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          const toast = document.getElementById('toast');
+          toast.classList.remove('translate-x-80', 'opacity-0');
+          toast.classList.add('translate-x-0', 'opacity-100');
+          setTimeout(() => {
+            toast.classList.remove('translate-x-0', 'opacity-100');
+            toast.classList.add('translate-x-80', 'opacity-0');
+          }, 3000);
+        } else {
+          alert('Hubo un error al guardar la configuración.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error de conexión.');
+      }
+    });
+  </script>
 </body>
 </html>
     `;

@@ -1,8 +1,9 @@
 /**
  * Calcula el resultado basado en la precisión del usuario respecto a los 9.00 segundos.
  */
-export function calculateResult(stoppedTime) {
-  const isExact = (stoppedTime.toFixed(2) === "9.00");
+export function calculateResult(stoppedTime, tolerance = 0.05) {
+  const diff = Math.abs(stoppedTime - 9.00);
+  const isExact = (diff <= tolerance);
 
   if (isExact) {
     return {

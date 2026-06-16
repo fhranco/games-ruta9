@@ -3,6 +3,20 @@
 # Navigate to script directory
 cd "$(dirname "$0")"
 
+# Liberar puertos 3001 y 3333 si están ocupados por ejecuciones anteriores
+echo "Limpiando procesos anteriores en puertos 3001 y 3333..."
+PID_3001=$(lsof -t -i:3001 2>/dev/null)
+if [ ! -z "$PID_3001" ]; then
+  echo "Deteniendo proceso antiguo en puerto 3001 (PID: $PID_3001)..."
+  kill -9 $PID_3001 2>/dev/null
+fi
+
+PID_3333=$(lsof -t -i:3333 2>/dev/null)
+if [ ! -z "$PID_3333" ]; then
+  echo "Deteniendo proceso antiguo en puerto 3333 (PID: $PID_3333)..."
+  kill -9 $PID_3333 2>/dev/null
+fi
+
 echo "=== DIAGNOSTICO DE INICIO DE JUEGOS ===" > server.log
 echo "Fecha: $(date)" >> server.log
 echo "Version Node: $(node -v)" >> server.log

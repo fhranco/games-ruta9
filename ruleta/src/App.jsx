@@ -27,6 +27,25 @@ function App() {
     return () => document.removeEventListener('contextmenu', handleContextMenu);
   }, []);
 
+  // Sincronizar configuraciones en inicio
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : '';
+        const response = await fetch(`${apiHost}/api/config`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.ok && data.settings) {
+            localStorage.setItem('r9_game_settings', JSON.stringify(data.settings));
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Error al obtener settings en ruleta.', err);
+      }
+    };
+    fetchConfig();
+  }, []);
+
   const [canInteract, setCanInteract] = useState(false);
 
   useEffect(() => {

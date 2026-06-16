@@ -12,6 +12,42 @@ function App() {
   const [playerData, setPlayerData] = useState({ name: '', receipt: '' })
   const [lastResult, setLastResult] = useState(null)
   const [adminClickCount, setAdminClickCount] = useState(0)
+  const [settings, setSettings] = useState({
+    winRateStandard: 0.25,
+    winRatePeak: 0.35,
+    peakHourStart: "16:30",
+    peakHourEnd: "20:30",
+    maxConsecutiveLossesStandard: 5,
+    maxConsecutiveLossesPeak: 3,
+    attemptsLimitPerReceipt: 1,
+    roulettePrizeWeights: {},
+    detenEl9Tolerance: 0.05
+  });
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : '';
+        const response = await fetch(`${apiHost}/api/config`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.ok && data.settings) {
+            setSettings(data.settings);
+            localStorage.setItem('r9_game_settings', JSON.stringify(data.settings));
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Error al obtener settings. Usando caché local.', err);
+        const cached = localStorage.getItem('r9_game_settings');
+        if (cached) {
+          try {
+            setSettings(JSON.parse(cached));
+          } catch (e) {}
+        }
+      }
+    };
+    fetchConfig();
+  }, []);
 
   // 🛡️ BLINDAJE KIOSCO: Bloqueo de menú contextual y Wake Lock
   useEffect(() => {
@@ -71,6 +107,7 @@ function App() {
 
         {gameState === 'playing' && (
           <StopwatchGame 
+            settings={settings}
             onFinished={(result) => {
               setLastResult(result)
               setGameState('result')
@@ -82,6 +119,7 @@ function App() {
           <ResultScreen 
             result={lastResult}
             playerData={playerData}
+            settings={settings}
             onReset={() => {
               setPlayerData({ name: '', phone: '' })
               setGameState('welcome')

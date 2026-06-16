@@ -11,6 +11,17 @@ export default defineConfig({
   ],
   server: {
     port: 3333,
-    host: true
+    host: true,
+    watch: {
+      ignored: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/public/games/**',
+        '**/*.log',
+        '**/stock_db.json',
+        '**/.git/**',
+        '**/.vite/**'
+      ]
+    }
   }
 })

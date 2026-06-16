@@ -6,7 +6,7 @@ import { storage } from '../utils/storage';
 import { Ticket, Share2, RefreshCcw } from 'lucide-react';
 import { sounds } from '../utils/sounds';
 
-export default function ResultScreen({ result, playerData, onReset }) {
+export default function ResultScreen({ result, playerData, onReset, settings }) {
   const [outcome, setOutcome] = useState(null);
   const [canInteract, setCanInteract] = useState(false);
   const hasSaved = React.useRef(false);
@@ -31,7 +31,8 @@ export default function ResultScreen({ result, playerData, onReset }) {
   useEffect(() => {
     if (hasSaved.current) return;
     
-    const localRes = calculateResult(result);
+    const tolerance = settings?.detenEl9Tolerance !== undefined ? settings.detenEl9Tolerance : 0.05;
+    const localRes = calculateResult(result, tolerance);
     
     const resolveOutcome = async () => {
       // Si el resultado local es de pérdida, no hay necesidad de reclamar premio físico

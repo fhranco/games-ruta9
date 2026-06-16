@@ -119,10 +119,30 @@ export default function RouletteWheel({ onFinished }) {
       const minutos = ahora.getMinutes();
       const minutosTotales = hora * 60 + minutos;
       
-      // Ventana Peak: 16:30 - 20:00 (en minutos: 990 a 1200)
-      const esPeak = (minutosTotales >= 990 && minutosTotales < 1200);
-      const winRate = esPeak ? 0.35 : 0.25; // 35% en peak, 25% estándar
-      const maxConsecutiveLossesAllowed = esPeak ? 3 : 5;
+      // Cargar configuraciones dinámicas desde caché
+      let dynSettings = {};
+      try {
+        const cached = localStorage.getItem('r9_game_settings');
+        if (cached) dynSettings = JSON.parse(cached);
+      } catch (e) {}
+
+      const peakStartStr = dynSettings.peakHourStart || "16:30";
+      const peakEndStr = dynSettings.peakHourEnd || "20:30";
+      const winRateStd = dynSettings.winRateStandard !== undefined ? dynSettings.winRateStandard : 0.25;
+      const winRatePeak = dynSettings.winRatePeak !== undefined ? dynSettings.winRatePeak : 0.35;
+      const maxLossesStd = dynSettings.maxConsecutiveLossesStandard !== undefined ? dynSettings.maxConsecutiveLossesStandard : 5;
+      const maxLossesPeak = dynSettings.maxConsecutiveLossesPeak !== undefined ? dynSettings.maxConsecutiveLossesPeak : 3;
+
+      const parseTimeToMinutes = (tStr) => {
+        const parts = tStr.split(':');
+        return parseInt(parts[0], 10) * 60 + parseInt(parts[1] || '0', 10);
+      };
+      const peakStartMin = parseTimeToMinutes(peakStartStr);
+      const peakEndMin = parseTimeToMinutes(peakEndStr);
+      const esPeak = (minutosTotales >= peakStartMin && minutosTotales < peakEndMin);
+
+      const winRate = esPeak ? winRatePeak : winRateStd;
+      const maxConsecutiveLossesAllowed = esPeak ? maxLossesPeak : maxLossesStd;
       
       let consecutiveLosses = parseInt(localStorage.getItem('r9_ruleta_consecutive_losses') || '0', 10);
       let isWinner = Math.random() < winRate;
@@ -134,7 +154,7 @@ export default function RouletteWheel({ onFinished }) {
 
       // Filtrar qué premios tienen stock real disponible en el bloque y en la ruleta
       const possiblePrizes = [];
-      const prizeWeights = {
+      const prizeWeights = dynSettings.roulettePrizeWeights || {
         HELADO_SOFT: 50,
         DESCUENTO_10: 25,
         PAPAS_FRITAS: 16,

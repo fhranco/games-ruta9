@@ -3,7 +3,7 @@ import PrimaryButton from './PrimaryButton';
 import { motion } from 'framer-motion';
 import { sounds } from '../utils/sounds';
 
-export default function StopwatchGame({ onFinished }) {
+export default function StopwatchGame({ onFinished, settings }) {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
   const isRunningRef = useRef(true);
@@ -73,13 +73,14 @@ export default function StopwatchGame({ onFinished }) {
     sounds.playStop();
     cancelAnimationFrame(requestRef.current);
     
+    const tolerance = settings?.detenEl9Tolerance !== undefined ? settings.detenEl9Tolerance : 0.05;
     let stoppedAt = time;
     if (!canWin) {
       const diff = Math.abs(stoppedAt - 9.00);
-      if (diff <= 0.05) {
-        // Inyectar error matemático sutil para forzar pérdida (> 0.05s de diferencia)
+      if (diff <= tolerance) {
+        // Inyectar error matemático sutil para forzar pérdida (> tolerance de diferencia)
         const sign = stoppedAt >= 9.00 ? 1 : -1;
-        stoppedAt = 9.00 + sign * (0.052 + Math.random() * 0.01);
+        stoppedAt = 9.00 + sign * (tolerance + 0.002 + Math.random() * 0.01);
         setTime(stoppedAt);
       }
     }
@@ -90,7 +91,8 @@ export default function StopwatchGame({ onFinished }) {
   };
 
   const getTimeColor = () => {
-    if (time >= 8.9 && time <= 9.1) return 'text-r9-red text-glow-red';
+    const tolerance = settings?.detenEl9Tolerance !== undefined ? settings.detenEl9Tolerance : 0.05;
+    if (time >= (9.00 - tolerance) && time <= (9.00 + tolerance)) return 'text-r9-red text-glow-red';
     if (time >= 8.0) return 'text-r9-gold text-glow-gold';
     return 'text-white/80';
   };
