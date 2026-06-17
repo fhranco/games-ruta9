@@ -18,7 +18,8 @@
       "DESCUENTO_20": 10,
       "DESCUENTO_30": 2
     },
-    "detenEl9Tolerance": 0.05
+    "detenEl9Tolerance": 0.05,
+    "adminPin": "R9Admin2026"
   },
   "gameStock": {
     "ruleta": {

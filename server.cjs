@@ -13,7 +13,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const DB_FILE = path.join(__dirname, 'stock_db.json');
 
 // Mapeo de nombres descriptivos de premios para los vouchers
@@ -139,6 +139,57 @@ const CORS_HEADERS = {
 // Cargar base de datos inicial
 loadDb();
 
+function checkAuth(req) {
+  const cookieHeader = req.headers.cookie || '';
+  return cookieHeader.includes('r9_admin_session=authenticated');
+}
+
+function serveLogin(req, res, errorMsg = '') {
+  const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ruta 9 — Acceso Administrativo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+  <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-[#C52026]/5 blur-[120px] pointer-events-none"></div>
+  <div class="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-[#FFB800]/5 blur-[120px] pointer-events-none"></div>
+
+  <div class="w-full max-w-md bg-slate-900/30 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-md space-y-8">
+    <div class="text-center">
+      <h1 class="text-3xl font-black italic tracking-tighter">
+        <span>RUTA</span><span class="text-[#C52026]">9</span>
+        <span class="font-light opacity-50 uppercase tracking-widest text-xs border-l border-white/20 pl-4 ml-2">ADMIN</span>
+      </h1>
+      <p class="text-slate-500 text-xs mt-2 uppercase tracking-widest font-black">Acceso Protegido</p>
+    </div>
+
+    <form action="/admin/login" method="POST" class="space-y-6">
+      <div class="space-y-2">
+        <label class="text-xs font-black uppercase tracking-wider text-slate-400">Contraseña Administrativa</label>
+        <input type="password" name="password" placeholder="••••••••" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-[#FFB800] outline-none transition-colors text-center font-mono tracking-widest">
+        ${errorMsg ? `<p class="text-xs text-red-500 font-bold mt-1 text-center">⚠️ ${errorMsg}</p>` : ''}
+      </div>
+
+      <button type="submit" class="w-full py-4 bg-[#FFB800] text-black font-black uppercase tracking-wider text-sm rounded-xl shadow-xl hover:bg-[#FFB800]/90 transition-all cursor-pointer">
+        🔑 Ingresar
+      </button>
+    </form>
+  </div>
+</body>
+</html>
+  `;
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.end(html);
+}
+
 const server = http.createServer((req, res) => {
   const parsedUrl = new URL(req.url, `http://localhost:${PORT}`);
   const pathName = parsedUrl.pathname;
@@ -152,6 +203,52 @@ const server = http.createServer((req, res) => {
     res.writeHead(204, CORS_HEADERS);
     res.end();
     return;
+  }
+
+  // Rutas públicas de Login
+  if (req.method === 'GET' && pathName === '/admin/login') {
+    serveLogin(req, res);
+    return;
+  }
+
+  if (req.method === 'POST' && pathName === '/admin/login') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      const params = new URLSearchParams(body);
+      const password = params.get('password');
+      const settings = db.settings || {};
+      const actualPin = settings.adminPin || "R9Admin2026";
+
+      if (password === actualPin) {
+        res.writeHead(302, {
+          'Set-Cookie': 'r9_admin_session=authenticated; Path=/; HttpOnly; Max-Age=86400',
+          'Location': '/admin/config'
+        });
+        res.end();
+      } else {
+        serveLogin(req, res, 'Contraseña incorrecta');
+      }
+    });
+    return;
+  }
+
+  // Protección de rutas administrativas
+  if (pathName === '/admin/config' || pathName === '/admin/logs') {
+    if (!checkAuth(req)) {
+      res.writeHead(302, { 'Location': '/admin/login' });
+      res.end();
+      return;
+    }
+  }
+
+  // Protección de API de configuración (POST)
+  if (req.method === 'POST' && pathName === '/api/config') {
+    if (!checkAuth(req)) {
+      res.writeHead(401, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'No autorizado' }));
+      return;
+    }
   }
 
   // ====================================================
@@ -735,6 +832,7 @@ const server = http.createServer((req, res) => {
               <span id="winRateStandardLabel" class="text-sm font-black text-[#FFB800] font-mono">25%</span>
             </div>
             <input type="range" name="winRateStandard" min="0" max="1" step="0.05" value="${settings.winRateStandard ?? 0.25}" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#FFB800]" oninput="document.getElementById('winRateStandardLabel').innerText = Math.round(this.value * 100) + '%'">
+            <p class="text-[11px] text-slate-500 mt-1.5 leading-snug">Porcentaje de premios entregados en horario normal. Ej: 25% significa que 1 de cada 4 jugadas entregará un premio.</p>
           </div>
 
           <!-- Win Rate Peak -->
@@ -744,6 +842,7 @@ const server = http.createServer((req, res) => {
               <span id="winRatePeakLabel" class="text-sm font-black text-[#C52026] font-mono">35%</span>
             </div>
             <input type="range" name="winRatePeak" min="0" max="1" step="0.05" value="${settings.winRatePeak ?? 0.35}" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#C52026]" oninput="document.getElementById('winRatePeakLabel').innerText = Math.round(this.value * 100) + '%'">
+            <p class="text-[11px] text-slate-500 mt-1.5 leading-snug">Porcentaje de premios entregados durante las horas peak configuradas al lado.</p>
           </div>
         </div>
       </div>
@@ -760,10 +859,12 @@ const server = http.createServer((req, res) => {
             <div class="space-y-1.5">
               <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Hora de Inicio</label>
               <input type="text" name="peakHourStart" value="${settings.peakHourStart || '16:30'}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Formato de 24 hrs. Ej: 16:30</p>
             </div>
             <div class="space-y-1.5">
               <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Hora de Fin</label>
               <input type="text" name="peakHourEnd" value="${settings.peakHourEnd || '20:30'}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Formato de 24 hrs. Ej: 20:30</p>
             </div>
           </div>
         </div>
@@ -778,10 +879,12 @@ const server = http.createServer((req, res) => {
             <div class="space-y-1.5">
               <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Intentos por Boleta</label>
               <input type="number" name="attemptsLimitPerReceipt" min="1" max="10" value="${settings.attemptsLimitPerReceipt || 1}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Máximo de juegos permitidos usando el mismo código de boleta.</p>
             </div>
             <div class="space-y-1.5">
               <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Tolerancia Detén 9 (s)</label>
               <input type="number" name="detenEl9Tolerance" min="0.01" max="0.5" step="0.01" value="${settings.detenEl9Tolerance || 0.05}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Margen de error para ganar. Ej: 0.05s significa ganar entre 8.95s y 9.05s (más alto es más fácil).</p>
             </div>
           </div>
         </div>
