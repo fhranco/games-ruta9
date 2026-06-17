@@ -820,122 +820,159 @@ const server = http.createServer((req, res) => {
     </header>
 
     <form id="configForm" class="space-y-8">
-      <!-- Sección: Tasas de Entrega -->
-      <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
+      <!-- SECCIÓN 1: CONFIGURACIÓN GENERAL -->
+      <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-xl backdrop-blur-md animate-fade-in">
         <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
-          <span>🎯</span> Frecuencia de Premios - Ruleta Ruta 9
-          <span class="bg-amber-500/20 text-[#FFB800] border border-amber-500/30 text-[9px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest ml-2 align-middle">Juego Ruleta</span>
+          <span>⚙️</span> Configuración General (Todos los Juegos)
+          <span class="bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[9px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest ml-2 align-middle">General</span>
         </h2>
-        <p class="text-slate-500 text-xs font-medium">Define qué porcentaje de los jugadores que participan en la ruleta recibirán un premio real en lugar de obtener "Sigue Participando".</p>
+        <p class="text-slate-500 text-xs">Parámetros globales que afectan a la experiencia de juego en todo el tótem.</p>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-          <!-- Win Rate Standard -->
-          <div class="space-y-3">
-            <div class="flex justify-between items-center">
-              <label class="text-xs font-black uppercase tracking-wider text-slate-400">Probabilidad en Horario Normal</label>
-              <span id="winRateStandardLabel" class="text-sm font-black text-[#FFB800] font-mono">25%</span>
-            </div>
-            <input type="range" name="winRateStandard" min="0" max="1" step="0.05" value="${settings.winRateStandard ?? 0.25}" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#FFB800]" oninput="document.getElementById('winRateStandardLabel').innerText = Math.round(this.value * 100) + '%'">
-            <p class="text-[11px] text-slate-500 mt-1.5 leading-snug">Porcentaje de personas que ganan en horario normal. Ejemplo: **25%** significa que de cada 100 personas que juegan, aproximadamente **25 ganarán** un premio físico (es decir, **1 de cada 4 ganará** y los otros 3 obtendrán 'Sigue Participando').</p>
-          </div>
-
-          <!-- Win Rate Peak -->
-          <div class="space-y-3">
-            <div class="flex justify-between items-center">
-              <label class="text-xs font-black uppercase tracking-wider text-slate-400">Probabilidad en Horas con Más Clientes (Hora Peak)</label>
-              <span id="winRatePeakLabel" class="text-sm font-black text-[#C52026] font-mono">35%</span>
-            </div>
-            <input type="range" name="winRatePeak" min="0" max="1" step="0.05" value="${settings.winRatePeak ?? 0.35}" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#C52026]" oninput="document.getElementById('winRatePeakLabel').innerText = Math.round(this.value * 100) + '%'">
-            <p class="text-[11px] text-slate-500 mt-1.5 leading-snug">Porcentaje de personas que ganan durante las horas peak (con más público). Ejemplo: **35%** significa que de cada 100 personas que jueguen en las horas configuradas abajo, aproximadamente **35 ganarán** un premio físico (es decir, **1 de cada 3 ganará**).</p>
+        <div class="max-w-md pt-2">
+          <div class="space-y-1.5">
+            <label class="text-xs font-black uppercase tracking-wider text-slate-400">Límite de Intentos por Boleta</label>
+            <input type="number" name="attemptsLimitPerReceipt" min="1" max="10" value="${settings.attemptsLimitPerReceipt || 1}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+            <p class="text-[10px] text-slate-600 mt-1 leading-snug">Cuántas veces se puede jugar con una misma boleta. Si pones **1**, el cliente solo puede meter su boleta una vez para jugar. Si intenta jugar otra vez con la misma boleta, el sistema no le entregará premios.</p>
           </div>
         </div>
       </div>
 
-      <!-- Sección: Horas Peak y Reintentos -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Rango Horario Peak -->
-        <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-xl backdrop-blur-md">
-          <h2 class="text-lg font-black text-white flex items-center gap-2 uppercase tracking-tight">
-            <span>⏰</span> Horas Peak - Ruleta Ruta 9
-            <span class="bg-amber-500/20 text-[#FFB800] border border-amber-500/30 text-[9px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest ml-2 align-middle">Juego Ruleta</span>
-          </h2>
-          <p class="text-slate-500 text-xs">Establece el horario en el que tu local tiene más flujo de público para que el sistema aumente automáticamente la cantidad de premios entregados (usando el porcentaje configurado arriba a la derecha).</p>
-          <div class="grid grid-cols-2 gap-4 pt-2">
-            <div class="space-y-1.5">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Hora de Inicio</label>
-              <input type="text" name="peakHourStart" value="${settings.peakHourStart || '16:30'}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Hora exacta en la que empieza la entrega alta. Escribir en formato de 24 hrs. Ejemplo: **16:30** para las 4:30 PM.</p>
-            </div>
-            <div class="space-y-1.5">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Hora de Fin</label>
-              <input type="text" name="peakHourEnd" value="${settings.peakHourEnd || '20:30'}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Hora exacta en la que finaliza la entrega alta. Escribir en formato de 24 hrs. Ejemplo: **20:30** para las 8:30 PM.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Límites de Intentos y Pérdidas -->
-        <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-xl backdrop-blur-md">
-          <h2 class="text-lg font-black text-white flex items-center gap-2 uppercase tracking-tight">
-            <span>🛡️</span> Dificultad y Control de los Juegos
-          </h2>
-          <p class="text-slate-500 text-xs">Ajusta el tiempo de partida, el margen de error y los reintentos para cada juego del tótem.</p>
-          <div class="grid grid-cols-2 gap-4 pt-2">
-            <div class="space-y-1.5">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5 flex-wrap">
-                <span>Intentos por Boleta</span>
-                <span class="bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wider uppercase">General (Todos)</span>
-              </label>
-              <input type="number" name="attemptsLimitPerReceipt" min="1" max="10" value="${settings.attemptsLimitPerReceipt || 1}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Cuántas veces se puede jugar con una misma boleta. Si pones **1**, el cliente solo puede meter su boleta una vez para jugar. Si intenta jugar otra vez con la misma boleta, el sistema no le entregará premios.</p>
-            </div>
-            <div class="space-y-1.5">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5 flex-wrap">
-                <span>Margen de Error Detén 9</span>
-                <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wider uppercase">Juego Detén el 9</span>
-              </label>
-              <input type="number" name="detenEl9Tolerance" min="0.01" max="0.5" step="0.01" value="${settings.detenEl9Tolerance || 0.05}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Margen de error en segundos para ganar. Escribir **0.05** significa que el cliente gana si frena entre **8.95 y 9.05 segundos**. Poner un número más alto (ej. 0.10) hace el juego **MÁS FÁCIL**; un número más bajo (ej. 0.02) lo hace **MÁS DIFÍCIL**.</p>
-            </div>
-            <div class="space-y-1.5 col-span-1">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5 flex-wrap">
-                <span>Tiempo de Cocción (Arma la Burger)</span>
-                <span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wider uppercase">Juego Arma la Burger</span>
-              </label>
-              <input type="number" name="calzaBurgerTimeLimit" min="5" max="120" value="${settings.calzaBurgerTimeLimit || 30}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Duración total de la partida para Calza Burger. Por defecto es **30** segundos. Subir el tiempo le da más segundos al cliente y hace el juego **MÁS FÁCIL**; bajar el tiempo lo hace **MÁS DIFÍCIL**.</p>
-            </div>
-            <div class="space-y-1.5 col-span-1">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5 flex-wrap">
-                <span>Tiempo de Memoria (Memoria Burger)</span>
-                <span class="bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wider uppercase">Juego Memoria Burger</span>
-              </label>
-              <input type="number" name="memoriaBurgerTimeLimit" min="5" max="120" value="${settings.memoriaBurgerTimeLimit || 30}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Duración total de la partida para Memoria Burger. Por defecto es **30** segundos. Subir el tiempo da más segundos para encontrar todas las parejas y hace el juego **MÁS FÁCIL**; bajarlo lo hace **MÁS DIFÍCIL**.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sección: Pesos de Premios de la Ruleta -->
+      <!-- SECCIÓN 2: JUEGO 1 - RULETA RUTA 9 -->
       <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
         <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
-          <span>🎡</span> Reparto y Frecuencia de Premios - Ruleta Ruta 9
+          <span>🎡</span> Juego 1: Ruleta Ruta 9
           <span class="bg-amber-500/20 text-[#FFB800] border border-amber-500/30 text-[9px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest ml-2 align-middle">Juego Ruleta</span>
         </h2>
-        <p class="text-slate-500 text-xs">Determina qué tan seguido sale cada premio cuando el cliente ya ganó. **El premio con el número más alto saldrá con mayor frecuencia; el que tenga el número más bajo saldrá menos.** Poner **0** bloquea el premio por completo (no saldrá nunca). Ejemplo: si pones 50 a Helado y 2 a Descuento 30%, el helado saldrá 25 veces más seguido.</p>
-        
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-2">
-          ${Object.keys(PRIZE_LABELS).filter(p => p !== 'SIGUE_PARTICIPANDO').map(prize => {
-            const weights = settings.roulettePrizeWeights || {};
-            const val = weights[prize] !== undefined ? weights[prize] : 10;
-            return `
-              <div class="space-y-2 bg-slate-950/40 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between">
-                <label class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">${PRIZE_LABELS[prize]}</label>
-                <input type="number" name="weight_${prize}" min="0" max="200" value="${val}" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-3 py-2 text-sm font-mono text-center focus:border-[#FFB800] outline-none">
+        <p class="text-slate-500 text-xs">Configura la probabilidad de ganar, los horarios de flujo alto (Peak) y el reparto de los premios físicos para la ruleta.</p>
+
+        <!-- Sub-grilla: Probabilidades y Horario Peak -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+          <!-- Probabilidades -->
+          <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-6 space-y-4">
+            <h3 class="text-sm font-black text-white uppercase tracking-wider border-b border-slate-850 pb-2 flex items-center gap-2">
+              <span>🎯</span> Probabilidad de Premios
+            </h3>
+            
+            <div class="space-y-4">
+              <!-- Win Rate Standard -->
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <label class="text-xs font-black uppercase tracking-wider text-slate-400">En Horario Normal</label>
+                  <span id="winRateStandardLabel" class="text-sm font-black text-[#FFB800] font-mono">25%</span>
+                </div>
+                <input type="range" name="winRateStandard" min="0" max="1" step="0.05" value="${settings.winRateStandard ?? 0.25}" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#FFB800]" oninput="document.getElementById('winRateStandardLabel').innerText = Math.round(this.value * 100) + '%'">
+                <p class="text-[10px] text-slate-500 leading-snug">Ejemplo: **25%** significa que 1 de cada 4 personas que juegan ganará un premio físico; los otros 3 obtendrán 'Sigue Participando'.</p>
               </div>
-            `;
-          }).join('')}
+
+              <!-- Win Rate Peak -->
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <label class="text-xs font-black uppercase tracking-wider text-slate-400">En Hora Peak (Alto Flujo)</label>
+                  <span id="winRatePeakLabel" class="text-sm font-black text-[#C52026] font-mono">35%</span>
+                </div>
+                <input type="range" name="winRatePeak" min="0" max="1" step="0.05" value="${settings.winRatePeak ?? 0.35}" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#C52026]" oninput="document.getElementById('winRatePeakLabel').innerText = Math.round(this.value * 100) + '%'">
+                <p class="text-[10px] text-slate-500 leading-snug">Ejemplo: **35%** significa que aproximadamente 1 de cada 3 personas que jueguen en las horas configuradas a la derecha ganará.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Horario Peak -->
+          <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-6 space-y-4">
+            <h3 class="text-sm font-black text-white uppercase tracking-wider border-b border-slate-850 pb-2 flex items-center gap-2">
+              <span>⏰</span> Rango Horario Peak
+            </h3>
+            <p class="text-[10px] text-slate-500">Establece las horas en las que el local tiene más público para activar automáticamente el porcentaje de premios alto.</p>
+            
+            <div class="grid grid-cols-2 gap-4 pt-2">
+              <div class="space-y-1">
+                <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Hora de Inicio</label>
+                <input type="text" name="peakHourStart" value="${settings.peakHourStart || '16:30'}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+                <p class="text-[9px] text-slate-600 mt-1 leading-snug text-center">Formato 24 hrs. Ejemplo: **16:30**</p>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Hora de Fin</label>
+                <input type="text" name="peakHourEnd" value="${settings.peakHourEnd || '20:30'}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+                <p class="text-[9px] text-slate-600 mt-1 leading-snug text-center">Formato 24 hrs. Ejemplo: **20:30**</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reparto de Premios de la Ruleta -->
+        <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-6 space-y-4">
+          <h3 class="text-sm font-black text-white uppercase tracking-wider border-b border-slate-850 pb-2 flex items-center gap-2">
+            <span>🎡</span> Reparto y Frecuencia de Premios
+          </h3>
+          <p class="text-[10px] text-slate-500">Determina qué tan seguido sale cada premio una vez que el sistema decide entregar uno. **El premio con el número más alto saldrá con mayor frecuencia; poner 0 bloquea el premio.**</p>
+          
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+            ${Object.keys(PRIZE_LABELS).filter(p => p !== 'SIGUE_PARTICIPANDO').map(prize => {
+              const weights = settings.roulettePrizeWeights || {};
+              const val = weights[prize] !== undefined ? weights[prize] : 10;
+              return `
+                <div class="space-y-2 bg-slate-950 border border-slate-900 rounded-xl p-3 flex flex-col justify-between">
+                  <label class="text-[9px] font-black uppercase tracking-wider text-slate-400 block">${PRIZE_LABELS[prize]}</label>
+                  <input type="number" name="weight_${prize}" min="0" max="200" value="${val}" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-3 py-1.5 text-xs font-mono text-center focus:border-[#FFB800] outline-none">
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: JUEGOS DE HABILIDAD Y DESTREZA -->
+      <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
+        <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
+          <span>🎮</span> Juegos de Habilidad y Destreza
+          <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest ml-2 align-middle">Habilidad</span>
+        </h2>
+        <p class="text-slate-500 text-xs">Configura la dificultad, margen de error o tiempo asignado para cada uno de los juegos interactivos.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          <!-- Juego 2: Detén el 9 -->
+          <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+            <div>
+              <h3 class="text-sm font-black text-white uppercase tracking-wider border-b border-slate-850 pb-2 flex items-center gap-2">
+                <span>🟢</span> Detén el 9
+              </h3>
+              <p class="text-[10px] text-slate-500 mt-2">Dificultad regulada por margen de error en segundos.</p>
+            </div>
+            <div class="space-y-2">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Margen de Error (s)</label>
+              <input type="number" name="detenEl9Tolerance" min="0.01" max="0.5" step="0.01" value="${settings.detenEl9Tolerance || 0.05}" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-2 text-xs font-mono text-center focus:border-[#FFB800] outline-none">
+              <p class="text-[9px] text-slate-600 mt-1 leading-snug">Margen para ganar. Escribir **0.05** significa ganar si frena entre **8.95 y 9.05 segundos** (número más alto = más fácil; número más bajo = más difícil).</p>
+            </div>
+          </div>
+
+          <!-- Juego 3: Calza Burger -->
+          <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+            <div>
+              <h3 class="text-sm font-black text-white uppercase tracking-wider border-b border-slate-850 pb-2 flex items-center gap-2">
+                <span>🔴</span> Arma la Burger
+              </h3>
+              <p class="text-[10px] text-slate-500 mt-2">Dificultad regulada por tiempo límite de cocción.</p>
+            </div>
+            <div class="space-y-2">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Tiempo de Cocción (s)</label>
+              <input type="number" name="calzaBurgerTimeLimit" min="5" max="120" value="${settings.calzaBurgerTimeLimit || 30}" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-2 text-xs font-mono text-center focus:border-[#FFB800] outline-none">
+              <p class="text-[9px] text-slate-600 mt-1 leading-snug">Duración total de la partida. Por defecto es **30** segundos. Dar más segundos hace el juego **MÁS FÁCIL**; dar menos lo hace **MÁS DIFÍCIL**.</p>
+            </div>
+          </div>
+
+          <!-- Juego 4: Memoria Burger -->
+          <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+            <div>
+              <h3 class="text-sm font-black text-white uppercase tracking-wider border-b border-slate-850 pb-2 flex items-center gap-2">
+                <span>🟣</span> Memoria Burger
+              </h3>
+              <p class="text-[10px] text-slate-500 mt-2">Dificultad regulada por tiempo límite para resolver.</p>
+            </div>
+            <div class="space-y-2">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Tiempo de Memoria (s)</label>
+              <input type="number" name="memoriaBurgerTimeLimit" min="5" max="120" value="${settings.memoriaBurgerTimeLimit || 30}" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-2 text-xs font-mono text-center focus:border-[#FFB800] outline-none">
+              <p class="text-[9px] text-slate-600 mt-1 leading-snug">Duración total de la partida. Por defecto es **30** segundos. Dar más segundos para emparejar hace el juego **MÁS FÁCIL**; dar menos lo hace **MÁS DIFÍCIL**.</p>
+            </div>
+          </div>
         </div>
       </div>
 
