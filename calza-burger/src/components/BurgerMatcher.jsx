@@ -202,9 +202,9 @@ const RECIPES = [
 
 const CUSTOMERS = ["👨‍🍳", "👩‍🍳", "👨", "👩", "🦁", "🍔", "🤖", "👾"];
 
-export default function BurgerMatcher({ onStop }) {
+export default function BurgerMatcher({ onStop, timeLimit }) {
   const [phase, setPhase] = useState('building'); // 'building', 'feedback'
-  const [timeLeft, setTimeLeft] = useState(30); // 30 segundos
+  const [timeLeft, setTimeLeft] = useState(timeLimit || 30); // Usar tiempo límite configurado o 30s por defecto
   const [completedCount, setCompletedCount] = useState(0);
   const [targetRecipe, setTargetRecipe] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0); 

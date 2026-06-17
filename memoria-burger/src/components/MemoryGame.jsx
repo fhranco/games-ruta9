@@ -74,12 +74,12 @@ const INGREDIENTS = [
   { id: 'lettuce', emoji: '🥬', name: 'LECHUGA ORG', color: 'from-green-400 to-emerald-600', neon: '#34D399' }
 ];
 
-export default function MemoryGame({ onStop }) {
+export default function MemoryGame({ onStop, timeLimit }) {
   const [cards, setCards] = useState([]);
   const [flippedIndices, setFlippedIndices] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState([]);
   const [gameStarted, setGameStarted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(timeLimit || 30);
   const [isProcessing, setIsProcessing] = useState(false);
   const [shakeIndices, setShakeIndices] = useState([]);
   const [glowIndices, setGlowIndices] = useState([]);

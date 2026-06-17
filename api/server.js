@@ -317,7 +317,10 @@ export default async (req, res) => {
         maxConsecutiveLossesPeak: parseInt(data.maxConsecutiveLossesPeak, 10) || 3,
         attemptsLimitPerReceipt: parseInt(data.attemptsLimitPerReceipt, 10) || 1,
         roulettePrizeWeights: data.roulettePrizeWeights || {},
-        detenEl9Tolerance: !isNaN(parseFloat(data.detenEl9Tolerance)) ? parseFloat(data.detenEl9Tolerance) : 0.05
+        detenEl9Tolerance: !isNaN(parseFloat(data.detenEl9Tolerance)) ? parseFloat(data.detenEl9Tolerance) : 0.05,
+        calzaBurgerTimeLimit: !isNaN(parseInt(data.calzaBurgerTimeLimit, 10)) ? parseInt(data.calzaBurgerTimeLimit, 10) : 30,
+        memoriaBurgerTimeLimit: !isNaN(parseInt(data.memoriaBurgerTimeLimit, 10)) ? parseInt(data.memoriaBurgerTimeLimit, 10) : 30,
+        adminPin: db.settings.adminPin || "R9Admin2026"
       };
 
       saveDb();
@@ -900,6 +903,16 @@ export default async (req, res) => {
               <input type="number" name="detenEl9Tolerance" min="0.01" max="0.5" step="0.01" value="${settings.detenEl9Tolerance || 0.05}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
               <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Margen de error en segundos para ganar. Escribir **0.05** significa que el cliente gana si frena entre **8.95 y 9.05 segundos**. Poner un número más alto (ej. 0.10) hace el juego **MÁS FÁCIL**; un número más bajo (ej. 0.02) lo hace **MÁS DIFÍCIL**.</p>
             </div>
+            <div class="space-y-1.5 col-span-1">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Tiempo de Cocción (Calza Burger) (s)</label>
+              <input type="number" name="calzaBurgerTimeLimit" min="5" max="120" value="${settings.calzaBurgerTimeLimit || 30}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Duración total de la partida para Calza Burger. Por defecto es **30** segundos. Subir el tiempo le da más segundos al cliente y hace el juego **MÁS FÁCIL**; bajar el tiempo lo hace **MÁS DIFÍCIL**.</p>
+            </div>
+            <div class="space-y-1.5 col-span-1">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Tiempo de Memoria (Memoria Burger) (s)</label>
+              <input type="number" name="memoriaBurgerTimeLimit" min="5" max="120" value="${settings.memoriaBurgerTimeLimit || 30}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
+              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Duración total de la partida para Memoria Burger. Por defecto es **30** segundos. Subir el tiempo da más segundos para encontrar todas las parejas y hace el juego **MÁS FÁCIL**; bajarlo lo hace **MÁS DIFÍCIL**.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -952,6 +965,8 @@ export default async (req, res) => {
         maxConsecutiveLossesPeak: 3,
         attemptsLimitPerReceipt: parseInt(formData.get('attemptsLimitPerReceipt'), 10),
         detenEl9Tolerance: parseFloat(formData.get('detenEl9Tolerance')),
+        calzaBurgerTimeLimit: parseInt(formData.get('calzaBurgerTimeLimit'), 10) || 30,
+        memoriaBurgerTimeLimit: parseInt(formData.get('memoriaBurgerTimeLimit'), 10) || 30,
         roulettePrizeWeights: {
           "DESCUENTO_30": parseInt(formData.get('weight_DESCUENTO_30'), 10) || 0,
           "DESCUENTO_20": parseInt(formData.get('weight_DESCUENTO_20'), 10) || 0,

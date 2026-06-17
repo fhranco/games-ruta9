@@ -5,12 +5,57 @@ import { calculateBurgerMatchResult, generateCouponCode } from './utils/gameLogi
 import { sounds } from './utils/sounds';
 import { Maximize, Minimize, RotateCcw, Brain, Trophy, Gamepad2 } from 'lucide-react';
 
+const getApiHost = () => {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryPort = urlParams.get('apiPort');
+    if (queryPort) return `http://localhost:${queryPort}`;
+
+    const currentPort = window.location.port;
+    if (currentPort === '3333' || currentPort === '5173' || currentPort === '5174') {
+      return 'http://localhost:3001';
+    }
+    if (currentPort) {
+      return `http://localhost:${currentPort}`;
+    }
+    return 'http://localhost:3001';
+  }
+  return '';
+};
+
 function App() {
   const [gameState, setGameState] = useState('welcome'); // welcome, playing, result
   const [playerData, setPlayerData] = useState({ name: 'Invitado', receipt: '0000' });
   const [result, setResult] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const [settings, setSettings] = useState(() => {
+    try {
+      const cached = localStorage.getItem('r9_game_settings');
+      return cached ? JSON.parse(cached) : { calzaBurgerTimeLimit: 30 };
+    } catch (e) {
+      return { calzaBurgerTimeLimit: 30 };
+    }
+  });
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const apiHost = getApiHost();
+        const response = await fetch(`${apiHost}/api/config`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.ok && data.settings) {
+            setSettings(data.settings);
+            localStorage.setItem('r9_game_settings', JSON.stringify(data.settings));
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Error al obtener settings. Usando caché local.', err);
+      }
+    };
+    fetchConfig();
+  }, []);
 
   useEffect(() => {
     const handleContextMenu = (e) => e.preventDefault();
@@ -56,7 +101,7 @@ function App() {
     }
 
     try {
-      const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : '';
+      const apiHost = getApiHost();
       const response = await fetch(`${apiHost}/api/claim-skill-prize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -312,7 +357,7 @@ function App() {
               animate={{ opacity: 1 }} 
               className="flex-1 w-full flex flex-col overflow-hidden"
             >
-              <BurgerMatcher onStop={handleStop} />
+              <BurgerMatcher onStop={handleStop} timeLimit={settings.calzaBurgerTimeLimit} />
             </motion.div>
           )}
 

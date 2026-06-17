@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-17T01:58:50.373Z",
+  "lastUpdated": "2026-06-17T02:19:21.090Z",
   "deliveredCount": 1,
   "settings": {
     "winRateStandard": 0.25,
@@ -18,7 +18,10 @@
       "SCHOP_BEBIDA": 12,
       "REGALO_SORPRESA": 12
     },
-    "detenEl9Tolerance": 0.05
+    "detenEl9Tolerance": 0.05,
+    "calzaBurgerTimeLimit": 45,
+    "memoriaBurgerTimeLimit": 15,
+    "adminPin": "R9Admin2026"
   },
   "gameStock": {
     "ruleta": {

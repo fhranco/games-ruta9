@@ -5,11 +5,56 @@ import { calculateMemoryMatchResult, generateCouponCode } from './utils/gameLogi
 import { sounds } from './utils/sounds';
 import { Maximize, Minimize, RotateCcw, Brain, Trophy } from 'lucide-react';
 
+const getApiHost = () => {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryPort = urlParams.get('apiPort');
+    if (queryPort) return `http://localhost:${queryPort}`;
+
+    const currentPort = window.location.port;
+    if (currentPort === '3333' || currentPort === '5173' || currentPort === '5174') {
+      return 'http://localhost:3001';
+    }
+    if (currentPort) {
+      return `http://localhost:${currentPort}`;
+    }
+    return 'http://localhost:3001';
+  }
+  return '';
+};
+
 function App() {
   const [gameState, setGameState] = useState('welcome'); // welcome, playing, result
   const [result, setResult] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const [settings, setSettings] = useState(() => {
+    try {
+      const cached = localStorage.getItem('r9_game_settings');
+      return cached ? JSON.parse(cached) : { memoriaBurgerTimeLimit: 30 };
+    } catch (e) {
+      return { memoriaBurgerTimeLimit: 30 };
+    }
+  });
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const apiHost = getApiHost();
+        const response = await fetch(`${apiHost}/api/config`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.ok && data.settings) {
+            setSettings(data.settings);
+            localStorage.setItem('r9_game_settings', JSON.stringify(data.settings));
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Error al obtener settings. Usando caché local.', err);
+      }
+    };
+    fetchConfig();
+  }, []);
 
   useEffect(() => {
     const handleContextMenu = (e) => e.preventDefault();
@@ -54,7 +99,7 @@ function App() {
     }
 
     try {
-      const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : '';
+      const apiHost = getApiHost();
       const response = await fetch(`${apiHost}/api/claim-skill-prize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -287,7 +332,7 @@ function App() {
                 <ul className="text-xs text-slate-300 space-y-1.5 list-disc pl-4 font-semibold">
                   <li>Toca cualquier carta para ver su ingrediente gourmet.</li>
                   <li>Encuentra su pareja en la plancha antes que se enfríe.</li>
-                  <li>Tienes 30 segundos. ¡Cada acierto te acerca al premio!</li>
+                  <li>Tienes ${settings.memoriaBurgerTimeLimit || 30} segundos. ¡Cada acierto te acerca al premio!</li>
                 </ul>
               </div>
 
@@ -311,7 +356,7 @@ function App() {
               animate={{ opacity: 1 }} 
               className="flex-1 w-full flex flex-col overflow-hidden"
             >
-              <MemoryGame onStop={handleStop} />
+              <MemoryGame onStop={handleStop} timeLimit={settings.memoriaBurgerTimeLimit} />
             </motion.div>
           )}
 
