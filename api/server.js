@@ -315,7 +315,6 @@ export default async (req, res) => {
         peakHourEnd: data.peakHourEnd || "20:30",
         maxConsecutiveLossesStandard: parseInt(data.maxConsecutiveLossesStandard, 10) || 5,
         maxConsecutiveLossesPeak: parseInt(data.maxConsecutiveLossesPeak, 10) || 3,
-        attemptsLimitPerReceipt: parseInt(data.attemptsLimitPerReceipt, 10) || 1,
         roulettePrizeWeights: data.roulettePrizeWeights || {},
         detenEl9Tolerance: !isNaN(parseFloat(data.detenEl9Tolerance)) ? parseFloat(data.detenEl9Tolerance) : 0.05,
         calzaBurgerTimeLimit: !isNaN(parseInt(data.calzaBurgerTimeLimit, 10)) ? parseInt(data.calzaBurgerTimeLimit, 10) : 30,
@@ -402,27 +401,8 @@ export default async (req, res) => {
     const ruletaStock = db.gameStock.ruleta;
 
     const settings = db.settings || {};
-    
-    // 1. Validar límite de intentos por boleta (evitar abusos)
-    const attemptsLimit = settings.attemptsLimitPerReceipt || 1;
-    const receiptPlayCount = db.deliveredList.filter(log => log.receipt === receipt).length;
-    if (receipt !== '0000' && receiptPlayCount >= attemptsLimit) {
-      console.log(`⚠️ [RULETA SERVERLESS - LIMIT] Boleta ${receipt} ya jugó (${receiptPlayCount}/${attemptsLimit}). Forzando perdedor.`);
-      const losingIndices = [1, 3, 5];
-      const selectedIndex = losingIndices[Math.floor(Math.random() * losingIndices.length)];
-      res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({
-        status: "PERDEDOR",
-        premio: "SIGUE_PARTICIPANDO",
-        label: PRIZE_LABELS["SIGUE_PARTICIPANDO"],
-        index: selectedIndex,
-        couponCode: "",
-        error: "Límite de intentos excedido"
-      }));
-      return;
-    }
 
-    // 2. Decidir si es un giro ganador (hora local de Chile)
+    // Decidir si es un giro ganador (hora local de Chile)
     const ahora = new Date();
     const chileTime = new Date(ahora.toLocaleString("en-US", {timeZone: "America/Santiago"}));
     const hora = chileTime.getHours();
@@ -575,22 +555,6 @@ export default async (req, res) => {
     }
 
     const settings = db.settings || {};
-    
-    // Validar límite de intentos por boleta (evitar abusos)
-    const attemptsLimit = settings.attemptsLimitPerReceipt || 1;
-    const receiptPlayCount = db.deliveredList.filter(log => log.receipt === receipt).length;
-    if (receipt !== '0000' && receiptPlayCount >= attemptsLimit) {
-      console.log(`⚠️ [HABILIDAD SERVERLESS - LIMIT] Boleta ${receipt} ya jugó (${receiptPlayCount}/${attemptsLimit}). Forzando perdedor.`);
-      res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({
-        status: "PERDEDOR",
-        premio: "SIGUE_PARTICIPANDO",
-        label: PRIZE_LABELS["SIGUE_PARTICIPANDO"],
-        couponCode: "",
-        error: "Límite de intentos excedido"
-      }));
-      return;
-    }
 
     const activeBlock = getActiveBlock(testBlock);
     const blockAvailable = getAvailableStockForBlock(activeBlock);
@@ -675,10 +639,9 @@ export default async (req, res) => {
           <td class="px-6 py-4 font-mono text-xs text-slate-500">${log.id}</td>
           <td class="px-6 py-4 font-semibold text-slate-300">${date}</td>
           <td class="px-6 py-4">
-            <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-950 border border-slate-800 text-[#FFB800]">${log.game.toUpperCase()}</span>
+            <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-950 border border-slate-800 text-white">${PRIZE_LABELS[log.prize] || log.prize}</span>
           </td>
           <td class="px-6 py-4 font-medium text-white">${log.playerName}</td>
-          <td class="px-6 py-4 font-mono text-xs text-slate-400">${log.receipt}</td>
           <td class="px-6 py-4">
             <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-950 border border-slate-800 text-white">${PRIZE_LABELS[log.prize] || log.prize}</span>
           </td>
@@ -760,7 +723,6 @@ export default async (req, res) => {
               <th class="px-6 py-4">Fecha / Hora (CL)</th>
               <th class="px-6 py-4">Juego</th>
               <th class="px-6 py-4">Jugador</th>
-              <th class="px-6 py-4">Boleta</th>
               <th class="px-6 py-4">Premio Otorgado</th>
               <th class="px-6 py-4">Código de Voucher</th>
               <th class="px-6 py-4 text-center">Bloque</th>
@@ -769,7 +731,7 @@ export default async (req, res) => {
           <tbody>
             ${tableRows || `
               <tr>
-                <td colspan="8" class="text-center py-16 text-slate-600 font-semibold uppercase tracking-widest text-sm">
+                <td colspan="7" class="text-center py-16 text-slate-600 font-semibold uppercase tracking-widest text-sm">
                   📭 Sin giros registrados aún.
                 </td>
               </tr>
@@ -834,25 +796,8 @@ export default async (req, res) => {
     </header>
 
     <form id="configForm" class="space-y-8">
-      <!-- SECCIÓN 1: CONFIGURACIÓN GENERAL -->
-      <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-xl backdrop-blur-md animate-fade-in">
-        <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
-          <span>⚙️</span> Configuración General (Todos los Juegos)
-          <span class="bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[9px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest ml-2 align-middle">General</span>
-        </h2>
-        <p class="text-slate-500 text-xs">Parámetros globales que afectan a la experiencia de juego en todo el tótem.</p>
-        
-        <div class="max-w-md pt-2">
-          <div class="space-y-1.5">
-            <label class="text-xs font-black uppercase tracking-wider text-slate-400">Límite de Intentos por Boleta</label>
-            <input type="number" name="attemptsLimitPerReceipt" min="1" max="10" value="${settings.attemptsLimitPerReceipt || 1}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-            <p class="text-[10px] text-slate-600 mt-1 leading-snug">Cuántas veces se puede jugar con una misma boleta. Si pones **1**, el cliente solo puede meter su boleta una vez para jugar. Si intenta jugar otra vez con la misma boleta, el sistema no le entregará premios.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECCIÓN 2: JUEGO 1 - RULETA RUTA 9 -->
-      <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
+      <!-- SECCIÓN 1: JUEGO 1 - RULETA RUTA 9 -->
+      <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md animate-fade-in">
         <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
           <span>🎡</span> Juego 1: Ruleta Ruta 9
           <span class="bg-amber-500/20 text-[#FFB800] border border-amber-500/30 text-[9px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest ml-2 align-middle">Juego Ruleta</span>
@@ -934,7 +879,7 @@ export default async (req, res) => {
         </div>
       </div>
 
-      <!-- SECCIÓN 3: JUEGOS DE HABILIDAD Y DESTREZA -->
+      <!-- SECCIÓN 2: JUEGOS DE HABILIDAD Y DESTREZA -->
       <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
         <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
           <span>🎮</span> Juegos de Habilidad y Destreza
@@ -1015,7 +960,6 @@ export default async (req, res) => {
         peakHourEnd: formData.get('peakHourEnd'),
         maxConsecutiveLossesStandard: 5,
         maxConsecutiveLossesPeak: 3,
-        attemptsLimitPerReceipt: parseInt(formData.get('attemptsLimitPerReceipt'), 10),
         detenEl9Tolerance: parseFloat(formData.get('detenEl9Tolerance')),
         calzaBurgerTimeLimit: parseInt(formData.get('calzaBurgerTimeLimit'), 10) || 30,
         memoriaBurgerTimeLimit: parseInt(formData.get('memoriaBurgerTimeLimit'), 10) || 30,
