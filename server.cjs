@@ -823,7 +823,8 @@ const server = http.createServer((req, res) => {
       <!-- Sección: Tasas de Entrega -->
       <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
         <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
-          <span>🎯</span> Frecuencia de Premios (Qué tan seguido gana la gente)
+          <span>🎯</span> Frecuencia de Premios - Ruleta Ruta 9
+          <span class="bg-amber-500/20 text-[#FFB800] border border-amber-500/30 text-[9px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest ml-2 align-middle">Juego Ruleta</span>
         </h2>
         <p class="text-slate-500 text-xs font-medium">Define qué porcentaje de los jugadores que participan en la ruleta recibirán un premio real en lugar de obtener "Sigue Participando".</p>
         
@@ -855,7 +856,8 @@ const server = http.createServer((req, res) => {
         <!-- Rango Horario Peak -->
         <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-xl backdrop-blur-md">
           <h2 class="text-lg font-black text-white flex items-center gap-2 uppercase tracking-tight">
-            <span>⏰</span> Horas Peak (Mayor entrega de premios)
+            <span>⏰</span> Horas Peak - Ruleta Ruta 9
+            <span class="bg-amber-500/20 text-[#FFB800] border border-amber-500/30 text-[9px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest ml-2 align-middle">Juego Ruleta</span>
           </h2>
           <p class="text-slate-500 text-xs">Establece el horario en el que tu local tiene más flujo de público para que el sistema aumente automáticamente la cantidad de premios entregados (usando el porcentaje configurado arriba a la derecha).</p>
           <div class="grid grid-cols-2 gap-4 pt-2">
@@ -875,27 +877,39 @@ const server = http.createServer((req, res) => {
         <!-- Límites de Intentos y Pérdidas -->
         <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-xl backdrop-blur-md">
           <h2 class="text-lg font-black text-white flex items-center gap-2 uppercase tracking-tight">
-            <span>🛡️</span> Reglas de Control y Dificultad
+            <span>🛡️</span> Dificultad y Control de los Juegos
           </h2>
-          <p class="text-slate-500 text-xs">Ajusta el límite de reintentos por cliente y la facilidad para ganar el juego del cronómetro.</p>
+          <p class="text-slate-500 text-xs">Ajusta el tiempo de partida, el margen de error y los reintentos para cada juego del tótem.</p>
           <div class="grid grid-cols-2 gap-4 pt-2">
             <div class="space-y-1.5">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Intentos por Boleta</label>
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5 flex-wrap">
+                <span>Intentos por Boleta</span>
+                <span class="bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wider uppercase">General (Todos)</span>
+              </label>
               <input type="number" name="attemptsLimitPerReceipt" min="1" max="10" value="${settings.attemptsLimitPerReceipt || 1}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
               <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Cuántas veces se puede jugar con una misma boleta. Si pones **1**, el cliente solo puede meter su boleta una vez para jugar. Si intenta jugar otra vez con la misma boleta, el sistema no le entregará premios.</p>
             </div>
             <div class="space-y-1.5">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Dificultad Detén 9 (s)</label>
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5 flex-wrap">
+                <span>Margen de Error Detén 9</span>
+                <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wider uppercase">Juego Detén el 9</span>
+              </label>
               <input type="number" name="detenEl9Tolerance" min="0.01" max="0.5" step="0.01" value="${settings.detenEl9Tolerance || 0.05}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
               <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Margen de error en segundos para ganar. Escribir **0.05** significa que el cliente gana si frena entre **8.95 y 9.05 segundos**. Poner un número más alto (ej. 0.10) hace el juego **MÁS FÁCIL**; un número más bajo (ej. 0.02) lo hace **MÁS DIFÍCIL**.</p>
             </div>
             <div class="space-y-1.5 col-span-1">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Tiempo de Cocción (Calza Burger) (s)</label>
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5 flex-wrap">
+                <span>Tiempo de Cocción (Arma la Burger)</span>
+                <span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wider uppercase">Juego Arma la Burger</span>
+              </label>
               <input type="number" name="calzaBurgerTimeLimit" min="5" max="120" value="${settings.calzaBurgerTimeLimit || 30}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
               <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Duración total de la partida para Calza Burger. Por defecto es **30** segundos. Subir el tiempo le da más segundos al cliente y hace el juego **MÁS FÁCIL**; bajar el tiempo lo hace **MÁS DIFÍCIL**.</p>
             </div>
             <div class="space-y-1.5 col-span-1">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Tiempo de Memoria (Memoria Burger) (s)</label>
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5 flex-wrap">
+                <span>Tiempo de Memoria (Memoria Burger)</span>
+                <span class="bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wider uppercase">Juego Memoria Burger</span>
+              </label>
               <input type="number" name="memoriaBurgerTimeLimit" min="5" max="120" value="${settings.memoriaBurgerTimeLimit || 30}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
               <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Duración total de la partida para Memoria Burger. Por defecto es **30** segundos. Subir el tiempo da más segundos para encontrar todas las parejas y hace el juego **MÁS FÁCIL**; bajarlo lo hace **MÁS DIFÍCIL**.</p>
             </div>
@@ -906,7 +920,8 @@ const server = http.createServer((req, res) => {
       <!-- Sección: Pesos de Premios de la Ruleta -->
       <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
         <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
-          <span>🎡</span> Reparto y Frecuencia de Premios (Ruleta)
+          <span>🎡</span> Reparto y Frecuencia de Premios - Ruleta Ruta 9
+          <span class="bg-amber-500/20 text-[#FFB800] border border-amber-500/30 text-[9px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest ml-2 align-middle">Juego Ruleta</span>
         </h2>
         <p class="text-slate-500 text-xs">Determina qué tan seguido sale cada premio cuando el cliente ya ganó. **El premio con el número más alto saldrá con mayor frecuencia; el que tenga el número más bajo saldrá menos.** Poner **0** bloquea el premio por completo (no saldrá nunca). Ejemplo: si pones 50 a Helado y 2 a Descuento 30%, el helado saldrá 25 veces más seguido.</p>
         
