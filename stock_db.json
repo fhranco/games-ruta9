@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-28T14:40:29.550Z",
+  "lastUpdated": "2026-06-17T01:58:50.373Z",
   "deliveredCount": 1,
   "settings": {
     "winRateStandard": 0.25,
@@ -10,16 +10,15 @@
     "maxConsecutiveLossesPeak": 3,
     "attemptsLimitPerReceipt": 1,
     "roulettePrizeWeights": {
-      "HELADO_SOFT": 50,
+      "DESCUENTO_30": 2,
+      "DESCUENTO_20": 10,
       "DESCUENTO_10": 25,
+      "HELADO_SOFT": 30,
       "PAPAS_FRITAS": 16,
       "SCHOP_BEBIDA": 12,
-      "REGALO_SORPRESA": 12,
-      "DESCUENTO_20": 10,
-      "DESCUENTO_30": 2
+      "REGALO_SORPRESA": 12
     },
-    "detenEl9Tolerance": 0.05,
-    "adminPin": "R9Admin2026"
+    "detenEl9Tolerance": 0.05
   },
   "gameStock": {
     "ruleta": {

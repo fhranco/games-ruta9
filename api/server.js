@@ -834,29 +834,29 @@ export default async (req, res) => {
       <!-- Sección: Tasas de Entrega -->
       <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
         <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
-          <span>🎯</span> Tasas de Entrega de Premios (Win Rates)
+          <span>🎯</span> Frecuencia de Premios (Qué tan seguido gana la gente)
         </h2>
-        <p class="text-slate-500 text-xs font-medium">Controla la probabilidad de que un tiro en la ruleta reciba un premio físico en vez de "Sigue Participando".</p>
+        <p class="text-slate-500 text-xs font-medium">Define qué porcentaje de los jugadores que participan en la ruleta recibirán un premio real en lugar de obtener "Sigue Participando".</p>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
           <!-- Win Rate Standard -->
           <div class="space-y-3">
             <div class="flex justify-between items-center">
-              <label class="text-xs font-black uppercase tracking-wider text-slate-400">Probabilidad Estándar</label>
+              <label class="text-xs font-black uppercase tracking-wider text-slate-400">Probabilidad en Horario Normal</label>
               <span id="winRateStandardLabel" class="text-sm font-black text-[#FFB800] font-mono">25%</span>
             </div>
             <input type="range" name="winRateStandard" min="0" max="1" step="0.05" value="${settings.winRateStandard ?? 0.25}" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#FFB800]" oninput="document.getElementById('winRateStandardLabel').innerText = Math.round(this.value * 100) + '%'">
-            <p class="text-[11px] text-slate-500 mt-1.5 leading-snug">Porcentaje de premios entregados en horario normal. Ej: 25% significa que 1 de cada 4 jugadas entregará un premio.</p>
+            <p class="text-[11px] text-slate-500 mt-1.5 leading-snug">Porcentaje de personas que ganan en horario normal. Ejemplo: **25%** significa que de cada 100 personas que juegan, aproximadamente **25 ganarán** un premio físico (es decir, **1 de cada 4 ganará** y los otros 3 obtendrán 'Sigue Participando').</p>
           </div>
 
           <!-- Win Rate Peak -->
           <div class="space-y-3">
             <div class="flex justify-between items-center">
-              <label class="text-xs font-black uppercase tracking-wider text-slate-400">Probabilidad Hora Peak</label>
+              <label class="text-xs font-black uppercase tracking-wider text-slate-400">Probabilidad en Horas con Más Clientes (Hora Peak)</label>
               <span id="winRatePeakLabel" class="text-sm font-black text-[#C52026] font-mono">35%</span>
             </div>
             <input type="range" name="winRatePeak" min="0" max="1" step="0.05" value="${settings.winRatePeak ?? 0.35}" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#C52026]" oninput="document.getElementById('winRatePeakLabel').innerText = Math.round(this.value * 100) + '%'">
-            <p class="text-[11px] text-slate-500 mt-1.5 leading-snug">Porcentaje de premios entregados durante las horas peak configuradas al lado.</p>
+            <p class="text-[11px] text-slate-500 mt-1.5 leading-snug">Porcentaje de personas que ganan durante las horas peak (con más público). Ejemplo: **35%** significa que de cada 100 personas que jueguen en las horas configuradas abajo, aproximadamente **35 ganarán** un premio físico (es decir, **1 de cada 3 ganará**).</p>
           </div>
         </div>
       </div>
@@ -866,19 +866,19 @@ export default async (req, res) => {
         <!-- Rango Horario Peak -->
         <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-xl backdrop-blur-md">
           <h2 class="text-lg font-black text-white flex items-center gap-2 uppercase tracking-tight">
-            <span>⏰</span> Ventana Horaria Peak
+            <span>⏰</span> Horas Peak (Mayor entrega de premios)
           </h2>
-          <p class="text-slate-500 text-xs">Franja horaria diaria en la que se aplica la tasa de entrega peak para aumentar la emoción en horas de alta afluencia.</p>
+          <p class="text-slate-500 text-xs">Establece el horario en el que tu local tiene más flujo de público para que el sistema aumente automáticamente la cantidad de premios entregados (usando el porcentaje configurado arriba a la derecha).</p>
           <div class="grid grid-cols-2 gap-4 pt-2">
             <div class="space-y-1.5">
               <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Hora de Inicio</label>
               <input type="text" name="peakHourStart" value="${settings.peakHourStart || '16:30'}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Formato de 24 hrs. Ej: 16:30</p>
+              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Hora exacta en la que empieza la entrega alta. Escribir en formato de 24 hrs. Ejemplo: **16:30** para las 4:30 PM.</p>
             </div>
             <div class="space-y-1.5">
               <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Hora de Fin</label>
               <input type="text" name="peakHourEnd" value="${settings.peakHourEnd || '20:30'}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Formato de 24 hrs. Ej: 20:30</p>
+              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Hora exacta en la que finaliza la entrega alta. Escribir en formato de 24 hrs. Ejemplo: **20:30** para las 8:30 PM.</p>
             </div>
           </div>
         </div>
@@ -886,19 +886,19 @@ export default async (req, res) => {
         <!-- Límites de Intentos y Pérdidas -->
         <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-xl backdrop-blur-md">
           <h2 class="text-lg font-black text-white flex items-center gap-2 uppercase tracking-tight">
-            <span>🛡️</span> Reglas de Seguridad
+            <span>🛡️</span> Reglas de Control y Dificultad
           </h2>
-          <p class="text-slate-500 text-xs">Control de reintentos por boleta para prevenir abusos de jugadores y reglas de tolerancia.</p>
+          <p class="text-slate-500 text-xs">Ajusta el límite de reintentos por cliente y la facilidad para ganar el juego del cronómetro.</p>
           <div class="grid grid-cols-2 gap-4 pt-2">
             <div class="space-y-1.5">
               <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Intentos por Boleta</label>
               <input type="number" name="attemptsLimitPerReceipt" min="1" max="10" value="${settings.attemptsLimitPerReceipt || 1}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Máximo de juegos permitidos usando el mismo código de boleta.</p>
+              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Cuántas veces se puede jugar con una misma boleta. Si pones **1**, el cliente solo puede meter su boleta una vez para jugar. Si intenta jugar otra vez con la misma boleta, el sistema no le entregará premios.</p>
             </div>
             <div class="space-y-1.5">
-              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Tolerancia Detén 9 (s)</label>
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500">Dificultad Detén 9 (s)</label>
               <input type="number" name="detenEl9Tolerance" min="0.01" max="0.5" step="0.01" value="${settings.detenEl9Tolerance || 0.05}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-center focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] outline-none transition-colors">
-              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Margen de error para ganar. Ej: 0.05s significa ganar entre 8.95s y 9.05s (más alto es más fácil).</p>
+              <p class="text-[10px] text-slate-600 mt-1 leading-snug text-center">Margen de error en segundos para ganar. Escribir **0.05** significa que el cliente gana si frena entre **8.95 y 9.05 segundos**. Poner un número más alto (ej. 0.10) hace el juego **MÁS FÁCIL**; un número más bajo (ej. 0.02) lo hace **MÁS DIFÍCIL**.</p>
             </div>
           </div>
         </div>
@@ -907,9 +907,9 @@ export default async (req, res) => {
       <!-- Sección: Pesos de Premios de la Ruleta -->
       <div class="bg-slate-900/20 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-md">
         <h2 class="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight">
-          <span>🎡</span> Ponderaciones de Premios (Ruleta)
+          <span>🎡</span> Reparto y Frecuencia de Premios (Ruleta)
         </h2>
-        <p class="text-slate-500 text-xs">Determina la probabilidad relativa de ganar cada premio en la ruleta cuando sale un tiro ganador. A mayor peso relativo, más frecuente será el premio.</p>
+        <p class="text-slate-500 text-xs">Determina qué tan seguido sale cada premio cuando el cliente ya ganó. **El premio con el número más alto saldrá con mayor frecuencia; el que tenga el número más bajo saldrá menos.** Poner **0** bloquea el premio por completo (no saldrá nunca). Ejemplo: si pones 50 a Helado y 2 a Descuento 30%, el helado saldrá 25 veces más seguido.</p>
         
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-2">
           ${Object.keys(PRIZE_LABELS).filter(p => p !== 'SIGUE_PARTICIPANDO').map(prize => {
